@@ -135,7 +135,7 @@ def run_optimized_ingestion_pipeline(
     embed_model
 ) -> List:
     """
-    Run the complete  ingestion pipeline with optimized chunking.
+    Run the complete ingestion pipeline with optimized chunking.
 
     Args:
         documents: List of documents from collect_all_documents()
@@ -151,10 +151,18 @@ def run_optimized_ingestion_pipeline(
     # Step 1: Create optimized chunks
     nodes = create_optimized_chunking(documents)
 
-    # Step 2: Apply embeddings
-    logger.info("\n🔄 Generating embeddings...")
+    # Step 2: Apply embeddings with batch parallelism
+    logger.info(f"\n🔄 Generating embeddings (batch_size={config.EMBED_BATCH_SIZE}, workers={config.EMBED_NUM_WORKERS})...")
+
+    # Set batch size on the embedding model for faster throughput
+    embed_model.embed_batch_size = config.EMBED_BATCH_SIZE
+
     pipeline = IngestionPipeline(transformations=[embed_model])
-    nodes = pipeline.run(nodes=nodes, show_progress=True)
+    nodes = pipeline.run(
+        nodes=nodes,
+        show_progress=True,
+        num_workers=config.EMBED_NUM_WORKERS,
+    )
 
     logger.info(f"\n✅ Created {len(nodes)} embedded nodes")
 

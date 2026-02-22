@@ -53,6 +53,10 @@ class Config:
     TABLE_CHUNK_SIZE = 1000
     TABLE_CHUNK_OVERLAP = 128
 
+    # Embedding batch settings
+    EMBED_BATCH_SIZE: int = 64
+    EMBED_NUM_WORKERS: int = 4
+
     FIGURE_CHUNK_SIZE = 500
     FIGURE_CHUNK_OVERLAP = 120
 

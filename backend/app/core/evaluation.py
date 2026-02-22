@@ -111,7 +111,9 @@ async def evaluate_retrievers(
 def load_gold_qa_questions(qa_path: Optional[str] = None) -> List[Dict[str, str]]:
     """
     Load gold QA dataset from file.
-    Format: question\\tanswer (one pair per line)
+    Supports two formats:
+    - Tab-separated: question\\tanswer (one pair per line)
+    - Question-only: one question per line (answer left empty)
     """
     path = qa_path or config.GOLD_QA_PATH
     if not os.path.exists(path):
@@ -129,6 +131,12 @@ def load_gold_qa_questions(qa_path: Optional[str] = None) -> List[Dict[str, str]
                 questions.append({
                     "question": parts[0].strip(),
                     "answer": parts[1].strip(),
+                })
+            else:
+                # Question-only format
+                questions.append({
+                    "question": line,
+                    "answer": "",
                 })
 
     logger.info(f"📋 Loaded {len(questions)} gold QA pairs from {path}")
