@@ -49,15 +49,13 @@ jobs:
 
       - name: Create .env from secrets
         run: |
-          cat > backend/.env << EOF
-          GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
-          PINECONE_INDEX_NAME=scientific-papers-ci
-          PINECONE_CLOUD=aws
-          PINECONE_REGION=us-east-1
-          REDIS_URL=redis://localhost:6379
-          EOF
+          echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" > backend/.env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> backend/.env
+          echo "PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}" >> backend/.env
+          echo "PINECONE_INDEX_NAME=scientific-papers-ci" >> backend/.env
+          echo "PINECONE_CLOUD=aws" >> backend/.env
+          echo "PINECONE_REGION=us-east-1" >> backend/.env
+          echo "REDIS_URL=redis://localhost:6379" >> backend/.env
 
       - name: Run pipeline evaluation
         env:
