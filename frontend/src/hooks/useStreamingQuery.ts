@@ -8,50 +8,64 @@ export interface Message {
     isStreaming?: boolean;
 }
 
-export function useStreamingQuery() {
-    const [messages, setMessages] = useState<Message[]>([]);
+const API_URL = 'http://localhost:8000';
+
+interface UseStreamingQueryOptions {
+    messages: Message[];
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+    documentId?: string | null;
+}
+
+export function useStreamingQuery({ messages, setMessages, documentId }: UseStreamingQueryOptions) {
     const [isLoading, setIsLoading] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
 
-    const sendMessage = useCallback(async (question: string, documentId?: string) => {
+    const sendMessage = useCallback(async (question: string) => {
         if (!question.trim()) return;
 
-        // Add user message immediately
-        const userMessage: Message = { id: Date.now().toString(), role: 'user', content: question };
-        const assistantMessageId = (Date.now() + 1).toString();
+        const userMessage: Message = {
+            id: Date.now().toString(),
+            role: 'user',
+            content: question,
+        };
 
-        setMessages((prev) => [
-            ...prev,
-            userMessage,
-            { id: assistantMessageId, role: 'assistant', content: '', isStreaming: true },
-        ]);
+        const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: '',
+            isStreaming: true,
+        };
 
+        setMessages(prev => [...prev, userMessage, assistantMessage]);
         setIsLoading(true);
 
-        try {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-            abortControllerRef.current = new AbortController();
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
 
-            const response = await fetch('http://localhost:8000/api/v1/query', {
+        try {
+            const body: any = {
+                question,
+                stream: true,
+            };
+            if (documentId) {
+                body.document_id = documentId;
+            }
+
+            const response = await fetch(`${API_URL}/api/v1/query`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'text/event-stream',
-                },
-                body: JSON.stringify({ question, document_id: documentId, stream: true }),
-                signal: abortControllerRef.current.signal,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                signal: abortController.signal,
             });
 
-            if (!response.ok) throw new Error('Query request failed');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const reader = response.body?.getReader();
+            if (!reader) throw new Error('Response body is not readable');
+
             const decoder = new TextDecoder();
-
-            if (!reader) throw new Error('No reader available');
-
-            let answerContent = '';
-            let sources: any[] = [];
             let buffer = '';
 
             while (true) {
@@ -60,73 +74,82 @@ export function useStreamingQuery() {
 
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n');
-                // Keep the last potentially incomplete line in the buffer
                 buffer = lines.pop() || '';
 
                 for (const line of lines) {
                     const trimmed = line.trim();
-                    if (!trimmed.startsWith('data: ')) continue;
-                    const dataStr = trimmed.slice(6); // Remove 'data: ' prefix
+                    if (!trimmed || !trimmed.startsWith('data: ')) continue;
 
                     try {
-                        const data = JSON.parse(dataStr);
+                        const data = JSON.parse(trimmed.slice(6));
 
                         if (data.type === 'answer') {
-                            // Backend sends the full answer in one event
-                            answerContent = data.content;
-                            setMessages(prev => prev.map(msg =>
-                                msg.id === assistantMessageId
-                                    ? { ...msg, content: answerContent }
-                                    : msg
-                            ));
+                            setMessages(prev =>
+                                prev.map(m =>
+                                    m.id === assistantMessage.id
+                                        ? { ...m, content: data.content }
+                                        : m
+                                )
+                            );
                         } else if (data.type === 'sources') {
-                            // Backend sends sources as a separate event
-                            sources = data.content || [];
+                            setMessages(prev =>
+                                prev.map(m =>
+                                    m.id === assistantMessage.id
+                                        ? { ...m, sources: data.content }
+                                        : m
+                                )
+                            );
                         } else if (data.type === 'done') {
-                            // Stream finished
+                            setMessages(prev =>
+                                prev.map(m =>
+                                    m.id === assistantMessage.id
+                                        ? { ...m, isStreaming: false }
+                                        : m
+                                )
+                            );
                         } else if (data.type === 'error') {
-                            answerContent = `Error: ${data.content}`;
-                            setMessages(prev => prev.map(msg =>
-                                msg.id === assistantMessageId
-                                    ? { ...msg, content: answerContent }
-                                    : msg
-                            ));
+                            setMessages(prev =>
+                                prev.map(m =>
+                                    m.id === assistantMessage.id
+                                        ? { ...m, content: `Error: ${data.content}`, isStreaming: false }
+                                        : m
+                                )
+                            );
                         }
-                    } catch (e) {
-                        // Ignore unparseable lines
+                    } catch {
+                        // Skip unparseable lines
                     }
                 }
             }
 
-            // Finalize the message
-            setMessages(prev => prev.map(msg =>
-                msg.id === assistantMessageId
-                    ? { ...msg, content: answerContent, sources, isStreaming: false }
-                    : msg
-            ));
-
+            // Ensure streaming is marked complete
+            setMessages(prev =>
+                prev.map(m =>
+                    m.id === assistantMessage.id
+                        ? { ...m, isStreaming: false }
+                        : m
+                )
+            );
         } catch (err: any) {
             if (err.name !== 'AbortError') {
-                console.error("Streaming error:", err);
-                setMessages(prev => prev.map(msg =>
-                    msg.id === assistantMessageId
-                        ? { ...msg, content: 'Sorry, I encountered an error while processing your request.', isStreaming: false }
-                        : msg
-                ));
+                setMessages(prev =>
+                    prev.map(m =>
+                        m.id === assistantMessage.id
+                            ? { ...m, content: `Error: ${err.message}`, isStreaming: false }
+                            : m
+                    )
+                );
             }
         } finally {
             setIsLoading(false);
             abortControllerRef.current = null;
         }
-    }, []);
+    }, [setMessages, documentId]);
 
     const stopGeneration = useCallback(() => {
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
-            setIsLoading(false);
-            setMessages(prev => prev.map(msg =>
-                msg.isStreaming ? { ...msg, isStreaming: false } : msg
-            ));
+            abortControllerRef.current = null;
         }
     }, []);
 

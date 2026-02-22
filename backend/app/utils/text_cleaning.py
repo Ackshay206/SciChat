@@ -30,6 +30,19 @@ def clean_text(text: str) -> str:
     return text.strip()
 
 
+def clean_text_inline(text: str) -> str:
+    """
+    Compact text cleaner for inline use during parsing.
+    Handles null bytes, form feeds, whitespace collapse, NaN removal.
+    """
+    if not text:
+        return ""
+    text = text.replace("\x00", "").replace("\x0c", "")
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"\bnan\b", "", text, flags=re.IGNORECASE)
+    return text.strip()
+
+
 def normalize_whitespace(text: str) -> str:
     """Collapse multiple spaces/tabs into single space."""
     return re.sub(r'[ \t]+', ' ', text).strip()

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FileText, PlusCircle, BookOpen, Trash2, Loader2 } from 'lucide-react';
+import { FileText, PlusCircle, BookOpen, Trash2, Loader2, Users, Mail, Building2, ChevronDown, ChevronRight } from 'lucide-react';
 import { api, DocumentInfo } from '@/lib/api';
 
 interface SidebarProps {
@@ -13,6 +13,7 @@ interface SidebarProps {
 export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }: SidebarProps) {
     const [documents, setDocuments] = useState<DocumentInfo[]>([]);
     const [loading, setLoading] = useState(true);
+    const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
 
     const loadDocs = async () => {
         try {
@@ -28,7 +29,6 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
 
     useEffect(() => {
         loadDocs();
-        // Expose a global event listener so other components can trigger a refresh
         window.addEventListener('refresh-docs', loadDocs);
         return () => window.removeEventListener('refresh-docs', loadDocs);
     }, []);
@@ -39,11 +39,19 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
         try {
             await api.deleteDocument(id);
             if (selectedDocId === id) onSelectDoc(null);
+            if (expandedDocId === id) setExpandedDocId(null);
             loadDocs();
         } catch (err) {
             console.error("Failed to delete", err);
         }
     };
+
+    const handleSelectDoc = (id: string) => {
+        onSelectDoc(id);
+        setExpandedDocId(expandedDocId === id ? null : id);
+    };
+
+    const selectedDoc = documents.find(d => d.document_id === selectedDocId);
 
     return (
         <div className="flex flex-col h-full bg-card/50 text-card-foreground">
@@ -71,30 +79,82 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
                     </div>
                 ) : (
                     documents.map(doc => (
-                        <div
-                            key={doc.document_id}
-                            onClick={() => onSelectDoc(doc.document_id)}
-                            className={`flex items-center justify-between p-3 rounded-md cursor-pointer transition-colors border group
-                ${selectedDocId === doc.document_id
-                                    ? 'bg-primary/10 border-primary/30'
-                                    : 'bg-muted/30 border-transparent hover:bg-muted/60 hover:border-border'
-                                }
-              `}
-                        >
-                            <div className="flex items-center gap-3 min-w-0 pr-2">
-                                <FileText className={`w-4 h-4 shrink-0 ${selectedDocId === doc.document_id ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate" title={doc.title}>{doc.title}</p>
-                                    <p className="text-xs text-muted-foreground truncate">{doc.num_nodes} nodes indexed</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={(e) => handleDelete(e, doc.document_id)}
-                                className="p-1.5 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-md hover:bg-background"
-                                title="Delete Document"
+                        <div key={doc.document_id} className="flex flex-col">
+                            <div
+                                onClick={() => handleSelectDoc(doc.document_id)}
+                                className={`flex items-center justify-between p-3 rounded-md cursor-pointer transition-colors border group
+                                    ${selectedDocId === doc.document_id
+                                        ? 'bg-primary/10 border-primary/30'
+                                        : 'bg-muted/30 border-transparent hover:bg-muted/60 hover:border-border'
+                                    }
+                                `}
                             >
-                                <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                                <div className="flex items-center gap-3 min-w-0 pr-2">
+                                    {selectedDocId === doc.document_id ? (
+                                        <ChevronDown className="w-4 h-4 shrink-0 text-primary" />
+                                    ) : (
+                                        <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate" title={doc.title}>{doc.title}</p>
+                                        <p className="text-xs text-muted-foreground truncate">{doc.num_nodes} nodes indexed</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={(e) => handleDelete(e, doc.document_id)}
+                                    className="p-1.5 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-md hover:bg-background"
+                                    title="Delete Document"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+
+                            {/* Expanded metadata panel */}
+                            {selectedDocId === doc.document_id && expandedDocId === doc.document_id && (
+                                <div className="ml-4 mt-1 mb-2 p-3 rounded-md bg-muted/20 border border-border/50 space-y-2 text-xs">
+                                    {doc.title && (
+                                        <p className="text-foreground font-medium text-sm leading-snug">{doc.title}</p>
+                                    )}
+
+                                    {doc.authors && doc.authors.length > 0 && (
+                                        <div className="flex items-start gap-2">
+                                            <Users className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                                            <p className="text-muted-foreground leading-relaxed">
+                                                {doc.authors.join(', ')}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {doc.emails && doc.emails.length > 0 && (
+                                        <div className="flex items-start gap-2">
+                                            <Mail className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                                            <div className="flex flex-col gap-0.5">
+                                                {doc.emails.map((email, i) => (
+                                                    <a key={i} href={`mailto:${email}`}
+                                                        className="text-primary/80 hover:text-primary underline-offset-2 hover:underline truncate">
+                                                        {email}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {doc.organizations && doc.organizations.length > 0 && (
+                                        <div className="flex items-start gap-2">
+                                            <Building2 className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                                            <p className="text-muted-foreground leading-relaxed">
+                                                {doc.organizations.join(' · ')}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <div className="pt-1 border-t border-border/30 flex items-center gap-3 text-muted-foreground">
+                                        <span>{doc.num_nodes} nodes</span>
+                                        <span>·</span>
+                                        <span>{doc.sections?.length || 0} sections</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))
                 )}

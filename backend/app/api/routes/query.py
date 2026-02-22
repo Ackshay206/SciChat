@@ -30,6 +30,15 @@ async def query_rag(request: QueryRequest):
     If stream=true, returns SSE stream.
     If stream=false, returns JSON response with answer and sources.
     """
+    # Switch to the requested document's namespace if needed
+    if request.document_id:
+        try:
+            app_state.switch_document(request.document_id)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to load document: {str(e)}")
+
     if not app_state.has_index or app_state.query_engine is None:
         raise HTTPException(
             status_code=400,

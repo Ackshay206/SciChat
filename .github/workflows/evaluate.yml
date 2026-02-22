@@ -47,6 +47,18 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
+      - name: Create .env from secrets
+        run: |
+          cat > backend/.env << EOF
+          GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
+          PINECONE_INDEX_NAME=scientific-papers-ci
+          PINECONE_CLOUD=gcp
+          PINECONE_REGION=us-central1
+          REDIS_URL=redis://localhost:6379
+          EOF
+
       - name: Run pipeline evaluation
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}

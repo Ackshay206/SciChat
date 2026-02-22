@@ -2,17 +2,23 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, Loader2, StopCircle, FileText, Upload } from 'lucide-react';
-import { useStreamingQuery } from '@/hooks/useStreamingQuery';
+import { useStreamingQuery, Message } from '@/hooks/useStreamingQuery';
 import { marked } from 'marked';
 
 interface ChatInterfaceProps {
     selectedDocId: string | null;
     onNewUploadClick: () => void;
+    messages: Message[];
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
-export default function ChatInterface({ selectedDocId, onNewUploadClick }: ChatInterfaceProps) {
+export default function ChatInterface({ selectedDocId, onNewUploadClick, messages, setMessages }: ChatInterfaceProps) {
     const [input, setInput] = useState('');
-    const { messages, sendMessage, isLoading, stopGeneration, setMessages } = useStreamingQuery();
+    const { sendMessage, isLoading, stopGeneration } = useStreamingQuery({
+        messages,
+        setMessages,
+        documentId: selectedDocId,
+    });
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to latest message
@@ -20,15 +26,10 @@ export default function ChatInterface({ selectedDocId, onNewUploadClick }: ChatI
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Reset chat when document changes
-    useEffect(() => {
-        setMessages([]);
-    }, [selectedDocId, setMessages]);
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
-        sendMessage(input, selectedDocId || undefined);
+        sendMessage(input);
         setInput('');
     };
 

@@ -6,6 +6,9 @@ export interface DocumentInfo {
     num_nodes: number;
     sections: string[];
     source_file: string;
+    authors: string[];
+    emails: string[];
+    organizations: string[];
 }
 
 export interface DocumentsResponse {

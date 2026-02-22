@@ -22,6 +22,9 @@ async def list_documents():
             num_nodes=meta.get("num_nodes", 0),
             sections=meta.get("sections", []),
             source_file=meta.get("filename", ""),
+            authors=meta.get("authors", []),
+            emails=meta.get("emails", []),
+            organizations=meta.get("organizations", []),
         )
         for doc_id, meta in app_state.documents_metadata.items()
     ]
@@ -41,6 +44,9 @@ async def get_document(document_id: str):
         num_nodes=meta.get("num_nodes", 0),
         sections=meta.get("sections", []),
         source_file=meta.get("filename", ""),
+        authors=meta.get("authors", []),
+        emails=meta.get("emails", []),
+        organizations=meta.get("organizations", []),
     )
 
 
@@ -56,11 +62,25 @@ async def delete_document(document_id: str):
         delete_namespace(namespace)
         del app_state.documents_metadata[document_id]
 
+        # Persist metadata after deletion
+        app_state.save_metadata()
+
         # Reset index/engine if this was the active document
-        if not app_state.documents_metadata:
-            app_state.index = None
-            app_state.nodes = []
-            app_state.query_engine = None
+        if app_state.active_doc_id == document_id:
+            app_state.active_doc_id = None
+            if app_state.documents_metadata:
+                # Switch to the next available document
+                next_id = next(iter(app_state.documents_metadata))
+                try:
+                    app_state.switch_document(next_id)
+                except Exception:
+                    app_state.index = None
+                    app_state.nodes = []
+                    app_state.query_engine = None
+            else:
+                app_state.index = None
+                app_state.nodes = []
+                app_state.query_engine = None
 
         logger.info(f"🗑️ Deleted document: {document_id}")
         return {"message": f"Document '{document_id}' deleted", "document_id": document_id}

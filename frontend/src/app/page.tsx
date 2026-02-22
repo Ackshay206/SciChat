@@ -1,26 +1,57 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import Sidebar from "@/components/Sidebar";
 import ChatInterface from "@/components/ChatInterface";
 import PdfUploader from '@/components/PdfUploader';
+import { Message } from '@/hooks/useStreamingQuery';
 
 export default function Home() {
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [showUploader, setShowUploader] = useState(false);
 
-  const handleDocumentSelect = (id: string | null) => {
+  // Per-paper chat history: Map<docId, Message[]>
+  const chatHistoryRef = useRef<Map<string, Message[]>>(new Map());
+
+  // Messages for the currently selected document
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  // Sync messages with the chat history map
+  const selectedDocIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // Save current messages before switching
+    if (selectedDocIdRef.current) {
+      chatHistoryRef.current.set(selectedDocIdRef.current, messages);
+    }
+  }, [messages]);
+
+  const handleDocumentSelect = useCallback((id: string | null) => {
+    // Save current doc's messages
+    if (selectedDocIdRef.current) {
+      chatHistoryRef.current.set(selectedDocIdRef.current, messages);
+    }
+
     setSelectedDocId(id);
+    selectedDocIdRef.current = id;
     setShowUploader(false);
-  };
+
+    // Load the new doc's messages
+    if (id) {
+      const savedMessages = chatHistoryRef.current.get(id) || [];
+      setMessages(savedMessages);
+    } else {
+      setMessages([]);
+    }
+  }, [messages]);
 
   const handleNewUploadClick = () => {
     setSelectedDocId(null);
+    selectedDocIdRef.current = null;
     setShowUploader(true);
   };
 
   const handleUploadSuccess = () => {
-    // Optionally auto-select the new doc here, but for now just refresh sidebar
     window.dispatchEvent(new Event('refresh-docs'));
     setShowUploader(false);
   };
@@ -57,6 +88,8 @@ export default function Home() {
           <ChatInterface
             selectedDocId={selectedDocId}
             onNewUploadClick={handleNewUploadClick}
+            messages={messages}
+            setMessages={setMessages}
           />
         )}
       </div>

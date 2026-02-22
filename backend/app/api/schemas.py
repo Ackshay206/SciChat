@@ -37,6 +37,9 @@ class IngestResponse(BaseModel):
     num_nodes: int
     num_documents: int
     sections: List[str] = []
+    authors: List[str] = []
+    emails: List[str] = []
+    organizations: List[str] = []
     message: str = "Document ingested successfully"
 
 
@@ -50,6 +53,9 @@ class DocumentInfo(BaseModel):
     num_nodes: int
     sections: List[str] = []
     source_file: str = ""
+    authors: List[str] = []
+    emails: List[str] = []
+    organizations: List[str] = []
 
 
 class DocumentListResponse(BaseModel):
