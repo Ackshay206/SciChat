@@ -40,6 +40,7 @@ Thumbs.db
 # ==========================================
 data/uploads/
 *.pdf
+!data/attention_is_all_you_need.pdf
 
 # ==========================================
 # Testing / Reports
