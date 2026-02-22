@@ -142,7 +142,7 @@ def run_optimized_ingestion_pipeline(
         embed_model: The embedding model instance
 
     Returns:
-        List of embedded nodes ready for indexing
+        List of embedded nodes   ready for indexing
     """
     logger.info("\n" + "=" * 60)
     logger.info("INGESTION PIPELINE (OPTIMIZED)")
