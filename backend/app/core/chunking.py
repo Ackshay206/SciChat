@@ -135,7 +135,7 @@ def run_optimized_ingestion_pipeline(
     embed_model
 ) -> List:
     """
-    Run the complete  ingestion pipeline with optimized chunking.
+    Run the complete ingestion pipeline with optimized chunking.
 
     Args:
         documents: List of documents from collect_all_documents()
