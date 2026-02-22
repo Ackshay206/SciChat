@@ -21,13 +21,13 @@ class Config:
     # API Keys
     # ============================================================
     GOOGLE_API_KEY: str = field(
-        default_factory=lambda: os.getenv("GOOGLE_API_KEY", "")
+        default_factory=lambda: os.getenv("GOOGLE_API_KEY", "").strip()
     )
     OPENAI_API_KEY: str = field(
-        default_factory=lambda: os.getenv("OPENAI_API_KEY", "")
+        default_factory=lambda: os.getenv("OPENAI_API_KEY", "").strip()
     )
     PINECONE_API_KEY: str = field(
-        default_factory=lambda: os.getenv("PINECONE_API_KEY", "")
+        default_factory=lambda: os.getenv("PINECONE_API_KEY", "").strip()
     )
 
     # ============================================================
@@ -77,13 +77,13 @@ class Config:
     # Pinecone Configuration
     # ============================================================
     PINECONE_INDEX_NAME: str = field(
-        default_factory=lambda: os.getenv("PINECONE_INDEX_NAME", "scientific-papers")
+        default_factory=lambda: os.getenv("PINECONE_INDEX_NAME", "scientific-papers").strip()
     )
     PINECONE_CLOUD: str = field(
-        default_factory=lambda: os.getenv("PINECONE_CLOUD", "aws")
+        default_factory=lambda: os.getenv("PINECONE_CLOUD", "aws").strip()
     )
     PINECONE_REGION: str = field(
-        default_factory=lambda: os.getenv("PINECONE_REGION", "us-east-1")
+        default_factory=lambda: os.getenv("PINECONE_REGION", "us-east-1").strip()
     )
     EMBEDDING_DIMENSION: int = 1024  # BAAI/bge-m3 dimension
 
