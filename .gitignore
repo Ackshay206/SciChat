@@ -1,0 +1,57 @@
+# ==========================================
+# Python / Backend
+# ==========================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+venv/
+.venv/
+env/
+.env
+*.env.local
+
+# ==========================================
+# Next.js / Frontend
+# ==========================================
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env*.local
+
+# ==========================================
+# IDE / Editor
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Data / Uploads (keep structure, ignore files)
+# ==========================================
+data/uploads/
+*.pdf
+
+# ==========================================
+# Testing / Reports
+# ==========================================
+parsing_report.txt
+results/
+htmlcov/
+.coverage
+.pytest_cache/
+*.log
+
+# ==========================================
+# Misc
+# ==========================================
+.gemini/

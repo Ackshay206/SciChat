@@ -1,0 +1,50 @@
+According to Table 2, what was the estimated training cost in FLOPs for the 'Transformer (big)' model on the English-to-French task?
+Looking at Table 3, what was the development set BLEU score for the base model after 100,000 steps?
+Based on Table 1, which layer type has a 'Maximum Path Length' of O(log_k(n))?
+From Table 2, compare the EN-DE BLEU scores of the 'GNMT RL Ensemble' and the 'Transformer (base model)'.
+According to Table 3, row A, how does changing the number of heads (h) to 1 affect the BLEU score compared to the base model?
+Identify the 'Complexity per Layer' for a Convolutional layer as listed in Table 1.
+From Table 3, what is the value of P_drop for the 'Transformer (big)' model?
+Based on Table 2, which previously reported model had the highest BLEU score on EN-FR before the Transformer?
+In Table 1, what is the 'Minimum number of sequential operations' for a Recurrent layer type?
+According to the text in Section 3.1, what is the fixed dimension (d_model) produced by all sub-layers and embedding layers?
+Describe the two main parts of the Transformer architecture as illustrated in Figure 1.
+Based on Figure 2, what are the three components that serve as input to the 'Scaled Dot-Product Attention' block?
+In Figure 1, where are the 'Positional Encodings' added in the encoder and decoder stacks?
+Explain the difference between the 'Scaled Dot-Product Attention' (left) and 'Multi-Head Attention' (right) diagrams in Figure 2.
+According to Figure 1, what specific layer follows the 'Multi-Head Attention' and 'Add & Norm' blocks in the encoder?
+In the architecture shown in Figure 1, how many 'identical layers' (N) make up the encoder and decoder stacks?
+Identify the specific sub-layer in the decoder (Figure 1) that is not present in the encoder.
+What does the 'Masked Multi-Head Attention' block in Figure 1 ensure regarding the auto-regressive property?
+According to Figure 2, what is the purpose of the 'Linear' layers before the 'Scaled Dot-Product Attention' in the Multi-Head setup?
+In Figure 1, what is the final layer before the 'Output Probabilities' are generated?
+What specific optimizer was used during training, and what were its associated beta1 and beta2 values?
+Define 'Label Smoothing' as described in Section 5.4 and state its specific value (epsilon_ls).
+What is the formula used for the 'Position-wise Feed-Forward Networks' (FFN)?
+The paper mentions 'Byte-pair encoding' (BPE). What was the size of the shared source-target vocabulary for the English-German dataset?
+Which specific hardware was used for training (model name and quantity), and what was the step time for the 'big' model?
+What are the specific dimensions for d_ff mentioned in Section 3.3?
+State the exact formula for 'sinusoidal positional encodings' used in the paper.
+What is the value of the 'scaling factor' used in Scaled Dot-Product Attention?
+The paper uses a specific beam search size and length penalty for inference. What are those values?
+What was the dropout rate (P_drop) used for the 'Transformer (base)' model?
+Why do the authors suspect that 'Scaled Dot-Product Attention' outperforms 'Additive Attention' for larger values of d_k?
+Explain the motivation for using Multi-Head Attention instead of a single attention function.
+How does the Transformer handle dependencies between distant positions in a sequence differently than convolutional models?
+What is the primary reason the authors chose 'sinusoidal positional encodings' over learned positional embeddings?
+Describe the role of 'Residual Connections' and 'Layer Normalization' within the Transformer's sub-layers.
+Why is the 'Sequential nature' of RNNs considered a fundamental constraint in sequence transduction?
+How does the 'Encoder-Decoder Attention' layer in the decoder differ from the 'Self-Attention' layers in the encoder?
+What does the paper conclude about the parallelizability of the Transformer compared to recurrent models?
+Explain the concept of 'Self-attention' (intra-attention) as defined in the context of this paper.
+How does the model prevent 'leftward information flow' in the decoder to maintain its auto-regressive property?
+Correlate the training time mentioned in the Abstract (for English-to-French) with the hardware and schedule details provided in Section 5.2.
+Using both Section 3.1 and Section 5.4, explain how 'Residual Dropout' is applied to the outputs of the encoder stacks.
+Link the 'desiderata' for self-attention in Section 4 with the complexity results presented in Table 1.
+Compare the performance improvement claims in the Conclusion with the specific BLEU score gains listed in Table 2 for the EN-DE task.
+How does the 'dimensionalities' (d_model and d_k) defined in Section 3 relate to the 'heads' (h) used in the base model configuration?
+Which reference (Author and Title) is cited for 'Layer Normalization'?
+What is the arXiv identifier for the paper 'Neural machine translation in linear time' mentioned in the references?
+Name the first three authors of the cited work 'Googles neural machine translation system: Bridging the gap between human and machine translation.'
+Which reference is associated with the 'Adam' stochastic optimization method?
+Who is the first author of the reference cited for 'Sequence to sequence learning with neural networks'?
