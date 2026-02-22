@@ -54,8 +54,8 @@ jobs:
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
           PINECONE_INDEX_NAME=scientific-papers-ci
-          PINECONE_CLOUD=gcp
-          PINECONE_REGION=us-central1
+          PINECONE_CLOUD=aws
+          PINECONE_REGION=us-east-1
           REDIS_URL=redis://localhost:6379
           EOF
 
@@ -65,8 +65,8 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
           PINECONE_INDEX_NAME: scientific-papers-ci
-          PINECONE_CLOUD: gcp
-          PINECONE_REGION: us-central1
+          PINECONE_CLOUD: aws
+          PINECONE_REGION: us-east-1
           REDIS_URL: redis://localhost:6379
         run: |
           cd backend

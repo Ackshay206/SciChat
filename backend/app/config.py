@@ -61,8 +61,8 @@ class Config:
     
     # Retrieval
     TOP_K: int = 5
-    VECTOR_WEIGHT: float = 0.8
-    BM25_WEIGHT: float = 0.2
+    VECTOR_WEIGHT: float = 0.85
+    BM25_WEIGHT: float = 0.15
 
     # ============================================================
     # Retrieval Configuration (from notebook Cells 11-12)
