@@ -48,7 +48,7 @@ class Config:
     TEXT_CHUNK_OVERLAP = 128
 
     SEC_CHUNK_SIZE = 256
-    SEC_CHUNK_OVERLAP = 50
+    SEC_CHUNK_OVERLAP = 80
 
     TABLE_CHUNK_SIZE = 1000
     TABLE_CHUNK_OVERLAP = 128
@@ -65,8 +65,8 @@ class Config:
     
     # Retrieval
     TOP_K: int = 5
-    VECTOR_WEIGHT: float = 0.85
-    BM25_WEIGHT: float = 0.15
+    VECTOR_WEIGHT: float = 0.9
+    BM25_WEIGHT: float = 0.1
 
     # ============================================================
     # Retrieval Configuration (from notebook Cells 11-12)

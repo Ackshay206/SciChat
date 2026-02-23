@@ -152,16 +152,25 @@ def run_optimized_ingestion_pipeline(
     nodes = create_optimized_chunking(documents)
 
     # Step 2: Apply embeddings with batch parallelism
-    logger.info(f"\n🔄 Generating embeddings (batch_size={config.EMBED_BATCH_SIZE}, workers={config.EMBED_NUM_WORKERS})...")
-
-    # Set batch size on the embedding model for faster throughput
     embed_model.embed_batch_size = config.EMBED_BATCH_SIZE
+
+    # num_workers > 1 uses multiprocessing which can't pickle torch
+    # tensors on MPS/GPU. Only use workers on CPU.
+    num_workers = config.EMBED_NUM_WORKERS
+    try:
+        import torch
+        if torch.backends.mps.is_available() or torch.cuda.is_available():
+            num_workers = 1  # Sequential — avoids pickle error on GPU/MPS
+    except Exception:
+        pass
+
+    logger.info(f"\n🔄 Generating embeddings (batch_size={config.EMBED_BATCH_SIZE}, workers={num_workers})...")
 
     pipeline = IngestionPipeline(transformations=[embed_model])
     nodes = pipeline.run(
         nodes=nodes,
         show_progress=True,
-        num_workers=config.EMBED_NUM_WORKERS,
+        num_workers=num_workers,
     )
 
     logger.info(f"\n✅ Created {len(nodes)} embedded nodes")
