@@ -55,6 +55,7 @@ def init_embed_model() -> HuggingFaceEmbedding:
     embed_model = HuggingFaceEmbedding(
         model_name=config.EMBEDDING_MODEL,
         trust_remote_code=True,
+        device="cpu",  # Explicit CPU — avoids MPS memory fragmentation/pickle errors
     )
     logger.info(f"✅ Embedding model initialized: {config.EMBEDDING_MODEL}")
     return embed_model

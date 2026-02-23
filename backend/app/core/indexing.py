@@ -46,7 +46,11 @@ def get_or_create_index(pc: Optional[Pinecone] = None) -> object:
                 region=config.PINECONE_REGION,   # "us-central1"
             ),
         )
-        logger.info(f"   ✅ Index '{config.PINECONE_INDEX_NAME}' created")
+        import time
+        logger.info(f"   ⏳ Waiting for index '{config.PINECONE_INDEX_NAME}' to be ready...")
+        while not pc.describe_index(config.PINECONE_INDEX_NAME).status['ready']:
+            time.sleep(2)
+        logger.info(f"   ✅ Index '{config.PINECONE_INDEX_NAME}' created and ready")
     else:
         logger.info(f"   ✅ Using existing index '{config.PINECONE_INDEX_NAME}'")
 
@@ -149,5 +153,14 @@ def delete_namespace(namespace: str) -> None:
     """Delete all vectors in a namespace."""
     pc = get_pinecone_client()
     pinecone_index = get_or_create_index(pc)
-    pinecone_index.delete(delete_all=True, namespace=namespace)
-    logger.info(f"🗑️ Deleted namespace '{namespace}'")
+    
+    try:
+        pinecone_index.delete(delete_all=True, namespace=namespace)
+        logger.info(f"🗑️ Deleted namespace '{namespace}'")
+    except Exception as e:
+        error_msg = str(e)
+        if "NotFoundException" in error_msg or "Namespace not found" in error_msg or "404" in error_msg:
+            logger.info(f"🗑️ Namespace '{namespace}' was already deleted or not found")
+        else:
+            logger.error(f"❌ Error deleting namespace '{namespace}': {e}")
+            raise

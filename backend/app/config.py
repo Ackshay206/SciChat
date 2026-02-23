@@ -35,7 +35,7 @@ class Config:
     # ============================================================
     LLM_MODEL: str = "models/gemini-2.5-flash"
     JUDGE_LLM_MODEL: str = "gpt-4o-mini"
-    EMBEDDING_MODEL: str = "BAAI/bge-m3"
+    EMBEDDING_MODEL: str = "BAAI/bge-base-en-v1.5"
 
     # ============================================================
     # Chunking Configuration (from notebook Cell 3)
@@ -54,7 +54,7 @@ class Config:
     TABLE_CHUNK_OVERLAP = 128
 
     # Embedding batch settings
-    EMBED_BATCH_SIZE: int = 64
+    EMBED_BATCH_SIZE: int = 32  # Smaller batches → lower peak RAM on CPU
     EMBED_NUM_WORKERS: int = 4
 
     FIGURE_CHUNK_SIZE = 500
@@ -89,7 +89,7 @@ class Config:
     PINECONE_REGION: str = field(
         default_factory=lambda: os.getenv("PINECONE_REGION", "us-east-1").strip()
     )
-    EMBEDDING_DIMENSION: int = 1024  # BAAI/bge-m3 dimension
+    EMBEDDING_DIMENSION: int = 768  # BAAI/bge-base-en-v1.5 dimension
 
     # ============================================================
     # Redis Configuration
