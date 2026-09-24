@@ -33,7 +33,7 @@ class Config:
     # ============================================================
     # Model Configuration (from notebook Cell 3)
     # ============================================================
-    LLM_MODEL: str = "models/gemini-2.5-flash"
+    LLM_MODEL: str = "models/gemini-3.5-flash-lite"
     JUDGE_LLM_MODEL: str = "gpt-4o-mini"
     EMBEDDING_MODEL: str = "BAAI/bge-base-en-v1.5"
 

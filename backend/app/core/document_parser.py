@@ -7,7 +7,7 @@ Contains:
 - Structured text extraction (metadata, abstract, sections as separate docs)
 - Full text extraction (page-by-page)
 - Reference extraction and parsing
-- Table extraction (hybrid 3-method approach with junk filter)
+- Table extraction (Docling layout + TableFormer, with junk filter)
 - Figure extraction (page-level rendering with captions)
 - OCR (per-figure-page)
 - Image description generation (Gemini Vision with context-aware prompt)
@@ -18,13 +18,12 @@ import io
 import re
 import logging
 from collections import Counter
+from functools import lru_cache
 from typing import Any, Dict, List, Optional
 
 import fitz  # PyMuPDF
 import numpy as np
-import pandas as pd
-import pdfplumber
-import tabula
+from docling.document_converter import DocumentConverter
 from PIL import Image
 from google import genai
 from google.genai import types
@@ -984,86 +983,34 @@ def _is_junk_table(text: str) -> bool:
     return False
 
 
-def extract_tables_from_pdf(pdf_path: str) -> List[Document]:
-    """Extract tables using hybrid approach with junk filtering."""
-    logger.info("📊 Extracting tables (hybrid approach)...")
+@lru_cache(maxsize=1)
+def _docling_converter() -> DocumentConverter:
+    return DocumentConverter()
 
-    all_table_texts = []
+
+def extract_tables_from_pdf(pdf_path: str) -> List[Document]:
+    """Extract tables using Docling (layout analysis + TableFormer) with junk filtering."""
+    logger.info("📊 Extracting tables (Docling)...")
+
+    doc = _docling_converter().convert(pdf_path).document
+    table_docs = []
     references_filtered = 0
 
-    # METHOD 1: TABULA (LATTICE + STREAM)
-    for mode, label in [("lattice", "Tabula-Lattice"), ("stream", "Tabula-Stream")]:
-        try:
-            kw = {"lattice": True} if mode == "lattice" else {"stream": True}
-            dfs = tabula.read_pdf(pdf_path, pages="all", multiple_tables=True, silent=True, **kw)
-            for i, df in enumerate(dfs):
-                if not df.empty:
-                    table_text = df.to_markdown(index=False)
-                    if _is_ref_table(table_text):
-                        references_filtered += 1
-                        continue
-                    if _is_junk_table(table_text):
-                        continue
-                    if table_text.strip():
-                        all_table_texts.append(f"[{label} Table {i+1}]\n{table_text}")
-            logger.info(f"   ✅ {label}: {len(dfs)} tables found")
-        except Exception as e:
-            logger.warning(f"   ⚠️ {label}: {e}")
+    for table in doc.tables:
+        table_text = table.export_to_markdown(doc=doc)
+        if _is_ref_table(table_text):
+            references_filtered += 1
+            continue
+        if _is_junk_table(table_text):
+            continue
 
-    # METHOD 2: PDFPLUMBER
-    try:
-        with pdfplumber.open(pdf_path) as pdf:
-            plumber_count = 0
-            for page_num, page in enumerate(pdf.pages):
-                tables = page.extract_tables()
-                for i, table in enumerate(tables):
-                    if table:
-                        df = pd.DataFrame(table[1:], columns=table[0] if table[0] else None)
-                        table_text = df.to_markdown(index=False)
-                        if _is_ref_table(table_text):
-                            references_filtered += 1
-                            continue
-                        if _is_junk_table(table_text):
-                            continue
-                        if table_text.strip():
-                            all_table_texts.append(f"[PDFPlumber Page {page_num+1} Table {i+1}]\n{table_text}")
-                            plumber_count += 1
-            logger.info(f"   ✅ PDFPlumber: {plumber_count} tables found")
-    except Exception as e:
-        logger.warning(f"   ⚠️ PDFPlumber: {e}")
-
-    # METHOD 3: PYMUPDF
-    try:
-        doc = fitz.open(pdf_path)
-        pymupdf_count = 0
-        for page_num in range(len(doc)):
-            tables = doc[page_num].find_tables()
-            for i, table in enumerate(tables):
-                df = table.to_pandas()
-                if not df.empty:
-                    table_text = df.to_markdown(index=False)
-                    if _is_ref_table(table_text):
-                        references_filtered += 1
-                        continue
-                    if _is_junk_table(table_text):
-                        continue
-                    if table_text.strip():
-                        all_table_texts.append(f"[PyMuPDF Page {page_num+1} Table {i+1}]\n{table_text}")
-                        pymupdf_count += 1
-        doc.close()
-        logger.info(f"   ✅ PyMuPDF: {pymupdf_count} tables found")
-    except Exception as e:
-        logger.warning(f"   ⚠️ PyMuPDF: {e}")
-
-    # Create Documents
-    table_docs = []
-    for i, text in enumerate(all_table_texts):
         table_docs.append(Document(
-            text=text,
+            text=table_text,
             metadata={
                 "type": "table",
                 "content_type": "table",
-                "table_index": i + 1,
+                "table_index": len(table_docs) + 1,
+                "page": table.prov[0].page_no if table.prov else 0,
             }
         ))
 
@@ -1181,7 +1128,7 @@ For each figure: number, type, sub-figures, components, labels, values, meaning.
 If no figures, respond: SKIP"""
 
                 response = vision_client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model=config.LLM_MODEL,
                     contents=[
                         types.Content(
                             role="user",

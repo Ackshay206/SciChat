@@ -1,8 +1,6 @@
 FROM python:3.11-slim
 
-# Install Java (required for tabula-py table extraction)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    default-jre-headless \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 

@@ -54,13 +54,15 @@ class CacheService:
 
     async def get_cached_response(
         self,
+        document_id: str,
         question: str,
         question_embedding: List[float],
     ) -> Optional[Dict[str, Any]]:
         """
-        Check if a semantically similar question has been cached.
+        Check if a semantically similar question has been cached for this document.
 
         Args:
+            document_id: Document the question is asked against
             question: The query string
             question_embedding: Embedding vector of the question
 
@@ -71,10 +73,7 @@ class CacheService:
             return None
 
         try:
-            # Get all cached keys
-            keys = await self._client.keys("cache:query:*")
-
-            for key in keys:
+            async for key in self._client.scan_iter(match=f"cache:{document_id}:*"):
                 cached_data = await self._client.get(key)
                 if not cached_data:
                     continue
@@ -108,6 +107,7 @@ class CacheService:
 
     async def cache_response(
         self,
+        document_id: str,
         question: str,
         question_embedding: List[float],
         answer: str,
@@ -117,6 +117,7 @@ class CacheService:
         Cache a query response.
 
         Args:
+            document_id: Document the question was asked against
             question: The query string
             question_embedding: Embedding vector of the question
             answer: The generated answer
@@ -126,7 +127,7 @@ class CacheService:
             return
 
         try:
-            cache_key = f"cache:query:{hashlib.md5(question.encode()).hexdigest()}"
+            cache_key = f"cache:{document_id}:{hashlib.md5(question.encode()).hexdigest()}"
 
             cache_data = json.dumps({
                 "question": question,
@@ -145,12 +146,12 @@ class CacheService:
         except Exception as e:
             logger.warning(f"Cache write error: {e}")
 
-    async def clear_cache(self) -> int:
-        """Clear all cached queries. Returns count of deleted keys."""
+    async def clear_cache(self, document_id: str) -> int:
+        """Clear cached queries for a document. Returns count of deleted keys."""
         if not self._connected:
             return 0
 
-        keys = await self._client.keys("cache:query:*")
+        keys = [key async for key in self._client.scan_iter(match=f"cache:{document_id}:*")]
         if keys:
             deleted = await self._client.delete(*keys)
             logger.info(f"🗑️ Cleared {deleted} cached entries")

@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 from app.api.schemas import DocumentInfo, DocumentListResponse
 from app.core.indexing import delete_namespace
 from app.dependencies import app_state
+from app.services.cache_service import cache_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -60,6 +61,7 @@ async def delete_document(document_id: str):
     try:
         namespace = meta.get("namespace", f"doc_{document_id}")
         delete_namespace(namespace)
+        await cache_service.clear_cache(document_id)
         del app_state.documents_metadata[document_id]
 
         # Persist metadata after deletion
