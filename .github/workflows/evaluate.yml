@@ -6,6 +6,7 @@ on:
     paths: ['backend/app/core/**']
   pull_request:
     paths: ['backend/app/core/**']
+  workflow_dispatch:
 
 env:
   PYTHON_VERSION: '3.11'
@@ -63,6 +64,7 @@ jobs:
           EVAL_PDF_PATH: ../data/attention_is_all_you_need.pdf
           EVAL_QA_PATH: ../data/eval/transformer_gold_qa_50.txt
           MLFLOW_TRACKING_URI: mlruns
+          MLFLOW_ALLOW_FILE_STORE: "true"
         run: |
           cd backend
           python -m scripts.run_evaluation
