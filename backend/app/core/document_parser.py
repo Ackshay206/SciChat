@@ -1055,7 +1055,7 @@ def extract_figures_from_pdf(pdf_path: str) -> List[Dict]:
 
 
 # =============================================================================
-# 16. OCR (PER-FIGURE-PAGE)
+# 16. OCR    (PER-FIGURE-PAGE)
 # =============================================================================
 
 def ocr_images(figures: List[Dict]) -> List[Document]:
