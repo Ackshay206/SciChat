@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { FileText, PlusCircle, BookOpen, Trash2, Loader2, Users, Mail, Building2, ChevronDown, ChevronRight } from 'lucide-react';
 import { api, DocumentInfo } from '@/lib/api';
+import { lastEval } from '@/lib/evalResults';
 
 interface SidebarProps {
     selectedDocId: string | null;
@@ -42,7 +43,7 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
             if (expandedDocId === id) setExpandedDocId(null);
             loadDocs();
         } catch (err) {
-            console.error("Failed to delete", err);
+            alert(err instanceof Error ? err.message : 'Failed to delete paper');
         }
     };
 
@@ -65,8 +66,8 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
 
             {/* Documents List */}
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                    Reference Library
+                <h2 className="text-sm font-medium text-muted-foreground mb-2">
+                    Papers
                 </h2>
 
                 {loading ? (
@@ -84,26 +85,26 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
                                 onClick={() => handleSelectDoc(doc.document_id)}
                                 className={`flex items-center justify-between p-3 rounded-md cursor-pointer transition-colors border group
                                     ${selectedDocId === doc.document_id
-                                        ? 'bg-primary/10 border-primary/30'
+                                        ? 'bg-accent/10 border-accent/30'
                                         : 'bg-muted/30 border-transparent hover:bg-muted/60 hover:border-border'
                                     }
                                 `}
                             >
                                 <div className="flex items-center gap-3 min-w-0 pr-2">
                                     {selectedDocId === doc.document_id ? (
-                                        <ChevronDown className="w-4 h-4 shrink-0 text-primary" />
+                                        <ChevronDown className="w-4 h-4 shrink-0 text-accent" />
                                     ) : (
                                         <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-foreground" />
                                     )}
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate" title={doc.title}>{doc.title}</p>
-                                        <p className="text-xs text-muted-foreground truncate">{doc.num_nodes} nodes indexed</p>
+                                        <p className="text-xs text-muted-foreground truncate">{doc.num_nodes} chunks indexed</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={(e) => handleDelete(e, doc.document_id)}
                                     className="p-1.5 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-md hover:bg-background"
-                                    title="Delete Document"
+                                    title="Delete paper"
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -118,7 +119,7 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
 
                                     {doc.authors && doc.authors.length > 0 && (
                                         <div className="flex items-start gap-2">
-                                            <Users className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                                            <Users className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
                                             <p className="text-muted-foreground leading-relaxed">
                                                 {doc.authors.join(', ')}
                                             </p>
@@ -127,11 +128,11 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
 
                                     {doc.emails && doc.emails.length > 0 && (
                                         <div className="flex items-start gap-2">
-                                            <Mail className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                                            <Mail className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
                                             <div className="flex flex-col gap-0.5">
                                                 {doc.emails.map((email, i) => (
                                                     <a key={i} href={`mailto:${email}`}
-                                                        className="text-primary/80 hover:text-primary underline-offset-2 hover:underline truncate">
+                                                        className="text-accent/90 hover:text-accent underline-offset-2 hover:underline truncate">
                                                         {email}
                                                     </a>
                                                 ))}
@@ -141,16 +142,15 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
 
                                     {doc.organizations && doc.organizations.length > 0 && (
                                         <div className="flex items-start gap-2">
-                                            <Building2 className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                                            <Building2 className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
                                             <p className="text-muted-foreground leading-relaxed">
-                                                {doc.organizations.join(' · ')}
+                                                {doc.organizations.join('; ')}
                                             </p>
                                         </div>
                                     )}
 
                                     <div className="pt-1 border-t border-border/30 flex items-center gap-3 text-muted-foreground">
-                                        <span>{doc.num_nodes} nodes</span>
-                                        <span>·</span>
+                                        <span>{doc.num_nodes} chunks</span>
                                         <span>{doc.sections?.length || 0} sections</span>
                                     </div>
                                 </div>
@@ -160,6 +160,38 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
                 )}
             </div>
 
+            {/* Last evaluation, set like a results table in a paper */}
+            <figure className="hidden md:block mx-4 mb-4 text-xs shrink-0">
+                <figcaption className="text-muted-foreground leading-relaxed mb-2">
+                    <span className="text-foreground font-medium">Table 1.</span> Answer quality on {lastEval.questions} hand-written
+                    questions about <span className="italic">{lastEval.paper}</span>, graded by {lastEval.judge}.
+                </figcaption>
+                <table className="w-full border-y border-foreground/40 tabular-nums">
+                    <thead>
+                        <tr className="border-b border-foreground/20 text-muted-foreground">
+                            <th className="text-left font-normal py-1.5">Metric</th>
+                            <th className="text-right font-normal py-1.5">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr title="Share of answers whose claims are supported by the retrieved passages">
+                            <td className="pt-1.5">Faithfulness</td>
+                            <td className="pt-1.5 text-right font-medium">{lastEval.faithfulness.toFixed(2)}</td>
+                        </tr>
+                        <tr title="Share of answers that address the question asked">
+                            <td className="pb-1.5">Relevancy</td>
+                            <td className="pb-1.5 text-right font-medium">{lastEval.relevancy.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p className="mt-2 text-muted-foreground">
+                    Answers by {lastEval.generator}. Evaluated in CI on {lastEval.date}.{' '}
+                    <a href={lastEval.runUrl} target="_blank" rel="noreferrer" className="text-accent hover:underline underline-offset-2">
+                        View run
+                    </a>
+                </p>
+            </figure>
+
             {/* Footer Actions */}
             <div className="p-4 border-t border-border flex flex-col gap-2 shrink-0">
                 <button
@@ -167,7 +199,7 @@ export default function Sidebar({ selectedDocId, onSelectDoc, onNewUploadClick }
                     className="flex items-center gap-2 w-full p-2 text-sm font-medium rounded-md transition-colors text-primary hover:text-primary-foreground hover:bg-primary/90 justify-center border border-primary/20 shadow-sm"
                 >
                     <PlusCircle className="w-4 h-4" />
-                    Add Paper
+                    Upload a paper
                 </button>
             </div>
         </div>

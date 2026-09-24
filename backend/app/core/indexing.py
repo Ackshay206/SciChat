@@ -10,6 +10,7 @@ from typing import List, Optional
 
 from pinecone import Pinecone, ServerlessSpec
 from llama_index.core import VectorStoreIndex, StorageContext
+from llama_index.core.vector_stores.utils import metadata_dict_to_node
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 
 from app.config import config
@@ -147,6 +148,32 @@ def load_existing_index(
 
     logger.info(f"✅ Loaded existing Pinecone index (namespace: {namespace or 'default'})")
     return index
+
+
+def wait_for_namespace(namespace: str, expected: int, timeout_s: int = 120) -> None:
+    """Block until Pinecone reports all expected vectors (writes are eventually consistent)."""
+    import time
+    pinecone_index = get_or_create_index()
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        summary = pinecone_index.describe_index_stats().namespaces.get(namespace)
+        if summary and summary.vector_count >= expected:
+            return
+        time.sleep(2)
+    logger.warning(f"⚠️ Namespace '{namespace}' not fully visible after {timeout_s}s")
+
+
+def load_namespace_nodes(namespace: str) -> List:
+    """Rebuild text nodes from a Pinecone namespace (node text is stored in vector metadata)."""
+    pinecone_index = get_or_create_index()
+    nodes = []
+    for page in pinecone_index.list(namespace=namespace):
+        ids = [item.id for item in page.vectors]
+        if ids:
+            fetched = pinecone_index.fetch(ids=ids, namespace=namespace)
+            nodes.extend(metadata_dict_to_node(dict(v.metadata)) for v in fetched.vectors.values())
+    logger.info(f"✅ Loaded {len(nodes)} nodes from namespace '{namespace}'")
+    return nodes
 
 
 def delete_namespace(namespace: str) -> None:

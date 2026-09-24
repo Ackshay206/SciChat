@@ -11,8 +11,10 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "framer-motion": "^12.34.3",
+    "katex": "^0.16.47",
     "lucide-react": "^0.575.0",
     "marked": "^17.0.3",
+    "marked-katex-extension": "^5.1.13",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",

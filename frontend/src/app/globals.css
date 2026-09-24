@@ -12,29 +12,26 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --font-sans: var(--font-inter);
+  --color-highlight: var(--highlight);
+  --font-sans: var(--font-plex-sans);
+  --font-serif: var(--font-source-serif);
 }
 
 :root {
-  --background: #020617;
-  /* slate-950 */
-  --foreground: #f8fafc;
-  /* slate-50 */
-  --card: #0f172a;
-  /* slate-900 */
-  --card-foreground: #f8fafc;
-  --border: #1e293b;
-  /* slate-800 */
-  --primary: #06b6d4;
-  /* cyan-500 */
-  --primary-foreground: #020617;
-  --accent: #3b82f6;
-  /* blue-500 */
-  --accent-foreground: #ffffff;
-  --muted: #1e293b;
-  /* slate-800 */
-  --muted-foreground: #94a3b8;
-  /* slate-400 */
+  --background: #0f1a2b;
+  /* ink navy */
+  --foreground: #e6eaf0;
+  --card: #162338;
+  --card-foreground: #e6eaf0;
+  --border: #263650;
+  --primary: #f2c94c;
+  /* highlighter: reserved for cited evidence and the primary action */
+  --primary-foreground: #0f1a2b;
+  --accent: #7fa7d9;
+  --accent-foreground: #0f1a2b;
+  --muted: #1d2c44;
+  --muted-foreground: #8a97ab;
+  --highlight: rgba(242, 201, 76, 0.07);
 }
 
 body {
@@ -45,7 +42,101 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar for sleeker look */
+/* Answer body: set like the text of a paper */
+.answer {
+  font-family: var(--font-serif), serif;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  max-width: 68ch;
+}
+
+.answer p+p,
+.answer p+ul,
+.answer p+ol,
+.answer ul+p,
+.answer ol+p {
+  margin-top: 0.75em;
+}
+
+.answer ul {
+  list-style: disc;
+  padding-left: 1.25em;
+}
+
+.answer ol {
+  list-style: decimal;
+  padding-left: 1.25em;
+}
+
+.answer li+li {
+  margin-top: 0.35em;
+}
+
+.answer strong {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.answer code {
+  font-size: 0.9em;
+  background: var(--muted);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+/* Citation marks: the answer's link back to its evidence */
+.cite {
+  display: inline-block;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  line-height: 1.25;
+  vertical-align: 0.45em;
+  margin: 0 0.08em;
+  padding: 0 0.4em;
+  border-radius: 3px;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  cursor: pointer;
+}
+
+.cite:hover {
+  background: #ffe08a;
+}
+
+.cite:focus-visible,
+button:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.source-flash {
+  animation: source-flash 1.6s ease-out;
+}
+
+@keyframes source-flash {
+  from {
+    background-color: rgba(242, 201, 76, 0.28);
+    border-color: var(--primary);
+  }
+
+  to {
+    background-color: var(--highlight);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .source-flash {
+    animation: none;
+  }
+
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

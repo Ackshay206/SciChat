@@ -11,11 +11,13 @@ import hashlib
 import logging
 import os
 import tempfile
+import threading
 from typing import Optional
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.api.schemas import IngestResponse
+from app.config import config
 from app.core.chunking import run_optimized_ingestion_pipeline
 from app.core.document_parser import collect_all_documents, analyze_document_structure
 from app.core.indexing import create_pinecone_index
@@ -26,12 +28,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+_ingest_lock = threading.Lock()
+
+
 @router.post("/ingest", response_model=IngestResponse)
-async def ingest_pdf(file: UploadFile = File(...)):
+def ingest_pdf(file: UploadFile = File(...)):
     """
     Upload and process a PDF document.
 
     Pipeline: Parse → Chunk → Embed → Index (Pinecone)
+    Sync endpoint: FastAPI runs it in a worker thread, so the event loop keeps serving queries.
     """
     if not app_state.is_initialized:
         raise HTTPException(status_code=503, detail="Models not yet loaded. Please wait.")
@@ -39,18 +45,37 @@ async def ingest_pdf(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
 
+    content = file.file.read()
+    if len(content) > config.MAX_UPLOAD_MB * 1024 * 1024:
+        raise HTTPException(status_code=413, detail=f"PDF must be under {config.MAX_UPLOAD_MB} MB")
+
+    # Generate document ID from content hash; re-uploads return the existing document
+    doc_id = hashlib.md5(content).hexdigest()[:12]
+    existing = app_state.documents_metadata.get(doc_id)
+    if existing:
+        return IngestResponse(
+            document_id=doc_id,
+            title=existing.get("title", "Unknown"),
+            num_nodes=existing.get("num_nodes", 0),
+            num_documents=existing.get("num_documents", 0),
+            sections=existing.get("sections", []),
+            authors=existing.get("authors", []),
+            emails=existing.get("emails", []),
+            organizations=existing.get("organizations", []),
+            message="Document already ingested",
+        )
+
+    if not _ingest_lock.acquire(blocking=False):
+        raise HTTPException(status_code=429, detail="Another paper is being processed. Please try again in a minute.")
+
     logger.info(f"📥 Ingesting: {file.filename}")
 
     # Save uploaded file temporarily
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-        content = await file.read()
         tmp.write(content)
         tmp_path = tmp.name
 
     try:
-        # Generate document ID from content hash
-        doc_id = hashlib.md5(content).hexdigest()[:12]
-
         # Step 1: Analyze structure first (for metadata)
         structure = analyze_document_structure(tmp_path)
 
@@ -80,6 +105,7 @@ async def ingest_pdf(file: UploadFile = File(...)):
         app_state.nodes = nodes
         app_state.query_engine = query_engine
         app_state.active_doc_id = doc_id
+        app_state.engines[doc_id] = (index, nodes, query_engine)
 
         # Extract title and sections for response
         title = structure.get("title", "Unknown") or "Unknown"
@@ -124,3 +150,4 @@ async def ingest_pdf(file: UploadFile = File(...)):
     finally:
         # Cleanup temp file
         os.unlink(tmp_path)
+        _ingest_lock.release()

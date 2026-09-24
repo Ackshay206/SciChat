@@ -11,10 +11,12 @@ Two evaluation modes:
 import asyncio
 import logging
 import os
+from itertools import product
 from typing import Any, Dict, List, Optional
 
 from llama_index.core import VectorStoreIndex
 from llama_index.core.evaluation import (
+    EmbeddingQAFinetuneDataset,
     FaithfulnessEvaluator,
     RelevancyEvaluator,
     RetrieverEvaluator,
@@ -24,7 +26,7 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 
 from app.api.schemas import RagQualityMetrics, RetrieverMetrics
 from app.config import config
-from app.core.retrieval import create_all_retrievers
+from app.core.retrieval import create_all_retrievers, create_reranker
 
 logger = logging.getLogger(__name__)
 
@@ -37,39 +39,56 @@ async def evaluate_retrievers(
     index: VectorStoreIndex,
     nodes: List,
     llm,
+    qa_path: Optional[str] = None,
 ) -> List[RetrieverMetrics]:
     """
-    Evaluate all retrievers (Vector, BM25, Hybrid) on generated QA pairs.
+    Evaluate all retrievers (Vector, BM25, Hybrid) on QA pairs, before and after reranking.
 
     Steps:
-    1. Generate question-context pairs from current nodes
-    2. Evaluate each retriever against generated pairs
+    1. Load frozen question-context pairs from qa_path, or generate them (and save to qa_path)
+    2. Evaluate each retriever raw (top-k) and with the cross-encoder reranker (top-n)
     3. Return MRR, Hit Rate, Precision, Recall for each
 
     From notebook Cells 13-14 — adapted for async.
     """
-    logger.info("📊 Generating QA pairs from nodes...")
+    if qa_path and os.path.exists(qa_path):
+        qa_dataset = EmbeddingQAFinetuneDataset.from_json(qa_path)
+        node_ids = {node.node_id for node in nodes}
+        total = len(qa_dataset.queries)
+        qa_dataset.queries = {
+            qid: q for qid, q in qa_dataset.queries.items()
+            if all(doc_id in node_ids for doc_id in qa_dataset.relevant_docs[qid])
+        }
+        logger.info(
+            f"📊 Loaded {total} frozen QA pairs from {qa_path}; "
+            f"{total - len(qa_dataset.queries)} skipped (source chunk no longer exists)"
+        )
+    else:
+        logger.info("📊 Generating QA pairs from nodes...")
+        qa_dataset = generate_question_context_pairs(
+            nodes=nodes,
+            llm=llm,
+            num_questions_per_chunk=1,
+        )
+        logger.info(f"   ✅ Generated {len(qa_dataset.queries)} question-context pairs")
+        if qa_path:
+            qa_dataset.save_json(qa_path)
+            logger.info(f"   💾 Saved QA pairs to {qa_path}")
 
-    # Step 1: Generate QA dataset from nodes
-    qa_dataset = generate_question_context_pairs(
-        nodes=nodes,
-        llm=llm,
-        num_questions_per_chunk=1,
-    )
-
-    logger.info(f"   ✅ Generated {len(qa_dataset.queries)} question-context pairs")
-
-    # Step 2: Create all retrievers
     retrievers = create_all_retrievers(index, nodes)
+    reranker = create_reranker()
 
     results = []
 
-    for name, retriever in retrievers.items():
+    stages = (("", None), ("_reranked", [reranker]))
+    for (name, retriever), (suffix, postprocessors) in product(retrievers.items(), stages):
+        name = f"{name}{suffix}"
         logger.info(f"   Evaluating {name} retriever...")
 
         retriever_eval = RetrieverEvaluator.from_metric_names(
             config.EVAL_METRICS_RETRIEVER,
             retriever=retriever,
+            node_postprocessors=postprocessors,
         )
 
         eval_results = await retriever_eval.aevaluate_dataset(qa_dataset)

@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "SciChat | Scientific RAG Assistant",
-  description: "An AI-powered research assistant for analyzing scientific papers.",
+  title: "SciChat: ask a paper, get cited answers",
+  description: "Ask questions about scientific papers and get answers grounded in, and cited to, the paper's own text.",
 };
 
 export default function RootLayout({
@@ -19,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} font-sans antialiased bg-background text-foreground h-screen overflow-hidden`}>
+      <body className={`${plexSans.variable} ${sourceSerif.variable} font-sans antialiased bg-background text-foreground h-screen overflow-hidden`}>
         {children}
       </body>
     </html>

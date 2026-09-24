@@ -9,6 +9,7 @@ Uses different SentenceSplitter configurations based on content_type:
 - Metadata: kept as single node
 """
 
+import hashlib
 import logging
 from typing import List
 
@@ -110,10 +111,11 @@ def create_optimized_chunking(documents: List[Document]) -> List:
             nodes = splitter.get_nodes_from_documents([doc])
             type_counts["text"] += len(nodes)
 
-        # Ensure all nodes have content_type metadata
+        # Ensure all nodes have content_type metadata and a content-based ID
         for node in nodes:
             if "content_type" not in node.metadata:
                 node.metadata["content_type"] = content_type
+            node.id_ = hashlib.md5(f"{content_type}:{node.get_content()}".encode()).hexdigest()
 
         all_nodes.extend(nodes)
 

@@ -45,6 +45,14 @@ def _check_question(question: str) -> Optional[str]:
     return None
 
 
+def _error_message(e: Exception) -> str:
+    """Map LLM quota/billing errors to a user-facing message."""
+    text = str(e)
+    if any(marker in text for marker in ("429", "RESOURCE_EXHAUSTED", "402", "quota")):
+        return "The demo has reached its AI usage limit for now. Please try again later."
+    return f"Something went wrong: {text}"
+
+
 @router.post("/query", response_model=QueryResponse)
 async def query_rag(request: QueryRequest):
     """
@@ -89,7 +97,7 @@ async def query_rag(request: QueryRequest):
 
     if request.stream:
         return StreamingResponse(
-            _stream_response(engine, request.question, doc_id, embedding, cached),
+            _stream_response(engine, request.question, doc_id, embedding, cached, start),
             media_type="text/event-stream",
         )
 
@@ -101,7 +109,10 @@ async def query_rag(request: QueryRequest):
             latency_ms=(time.time() - start) * 1000,
         )
 
-    result = await aquery(engine, request.question)
+    try:
+        result = await aquery(engine, request.question)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=_error_message(e))
     latency = (time.time() - start) * 1000
 
     await cache_service.cache_response(
@@ -116,18 +127,21 @@ async def query_rag(request: QueryRequest):
     )
 
 
-def _sse_events(result: dict):
+def _sse_events(result: dict, meta: Optional[dict] = None):
     yield f"data: {json.dumps({'type': 'answer', 'content': result['answer']})}\n\n"
     yield f"data: {json.dumps({'type': 'sources', 'content': result['sources']})}\n\n"
+    if meta:
+        yield f"data: {json.dumps({'type': 'meta', 'content': meta})}\n\n"
     yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
 
-async def _stream_response(engine, question: str, doc_id: str, embedding, cached: Optional[dict]):
+async def _stream_response(engine, question: str, doc_id: str, embedding, cached: Optional[dict], start: float):
     """SSE stream generator."""
     try:
         result = cached or await aquery(engine, question)
 
-        for event in _sse_events(result):
+        meta = {"latency_ms": (time.time() - start) * 1000, "cached": bool(cached)}
+        for event in _sse_events(result, meta):
             yield event
 
         if not cached:
@@ -136,4 +150,4 @@ async def _stream_response(engine, question: str, doc_id: str, embedding, cached
             )
 
     except Exception as e:
-        yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
+        yield f"data: {json.dumps({'type': 'error', 'content': _error_message(e)})}\n\n"

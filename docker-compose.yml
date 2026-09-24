@@ -1,33 +1,16 @@
 services:
-  backend:
-    build: ./backend
+  app:
+    build: .
     ports:
-      - "8000:8000"
+      - "7860:7860"
+    env_file: backend/.env
+    environment:
+      - DEMO_MODE=false
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - redis
-    env_file: .env
-    volumes:
-      - ./backend:/app
-      - ./data:/data
-      - ./attention_is_all_you_need.pdf:/data/attention_is_all_you_need.pdf:ro
-    environment:
-      - PYTHONUNBUFFERED=1
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
-
-volumes:
-  redis_data:

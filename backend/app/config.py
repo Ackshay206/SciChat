@@ -108,13 +108,24 @@ class Config:
         default_factory=lambda: ["mrr", "hit_rate", "precision", "recall"]
     )
 
+    # ============================================================
+    # Deployment
+    # ============================================================
+    DEMO_MODE: bool = field(
+        default_factory=lambda: os.getenv("DEMO_MODE", "false").strip().lower() == "true"
+    )
+    CORS_ORIGINS: list = field(
+        default_factory=lambda: os.getenv(
+            "CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
+        ).split(",")
+    )
+    MAX_UPLOAD_MB: int = 10
+
     def validate(self) -> None:
-        """Validate that required API keys are present."""
+        """Validate that required API keys are present (OPENAI_API_KEY is only needed for evaluation)."""
         missing = []
         if not self.GOOGLE_API_KEY:
             missing.append("GOOGLE_API_KEY")
-        if not self.OPENAI_API_KEY:
-            missing.append("OPENAI_API_KEY")
         if not self.PINECONE_API_KEY:
             missing.append("PINECONE_API_KEY")
         if missing:

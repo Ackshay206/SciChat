@@ -5,6 +5,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 
 from app.api.schemas import DocumentInfo, DocumentListResponse
+from app.config import config
 from app.core.indexing import delete_namespace
 from app.dependencies import app_state
 from app.services.cache_service import cache_service
@@ -54,6 +55,8 @@ async def get_document(document_id: str):
 @router.delete("/documents/{document_id}")
 async def delete_document(document_id: str):
     """Delete a document and its vectors from Pinecone."""
+    if config.DEMO_MODE:
+        raise HTTPException(status_code=403, detail="Deleting papers is disabled in the hosted demo.")
     meta = app_state.documents_metadata.get(document_id)
     if not meta:
         raise HTTPException(status_code=404, detail=f"Document '{document_id}' not found")
@@ -62,6 +65,7 @@ async def delete_document(document_id: str):
         namespace = meta.get("namespace", f"doc_{document_id}")
         delete_namespace(namespace)
         await cache_service.clear_cache(document_id)
+        app_state.engines.pop(document_id, None)
         del app_state.documents_metadata[document_id]
 
         # Persist metadata after deletion

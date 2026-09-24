@@ -8,6 +8,7 @@ Provides:
 """
 
 import logging
+from typing import Optional
 
 from llama_index.core import Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
@@ -32,11 +33,14 @@ def init_llm() -> Gemini:
     return llm
 
 
-def init_judge_llm() -> OpenAI:
+def init_judge_llm() -> Optional[OpenAI]:
     """
     Initialize the judge LLM for evaluation (GPT-4o-mini).
-    From notebook Cell 5 — unchanged.
+    Returns None when OPENAI_API_KEY is not set (evaluation is then unavailable).
     """
+    if not config.OPENAI_API_KEY:
+        logger.info("ℹ️ OPENAI_API_KEY not set — judge LLM disabled")
+        return None
     judge_llm = OpenAI(
         model=config.JUDGE_LLM_MODEL,
         api_key=config.OPENAI_API_KEY,

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { UploadCloud, File, X, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/api';
 
 export default function PdfUploader({ onUploadSuccess }: { onUploadSuccess?: (doc: any) => void }) {
     const [isDragging, setIsDragging] = useState(false);
@@ -42,12 +43,12 @@ export default function PdfUploader({ onUploadSuccess }: { onUploadSuccess?: (do
             // Simulate step change for UX
             setTimeout(() => { if (statusRef.current === 'uploading') setStatus('processing') }, 1000);
 
-            const res = await fetch('http://localhost:8000/api/v1/ingest', {
+            const res = await fetch(`${API_BASE_URL}/ingest`, {
                 method: 'POST',
                 body: formData,
             });
 
-            if (!res.ok) throw new Error('Upload failed');
+            if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || 'Upload failed');
             const data = await res.json();
 
             setStatus('success');

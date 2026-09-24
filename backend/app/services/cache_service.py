@@ -37,7 +37,7 @@ class CacheService:
             )
             await self._client.ping()
             self._connected = True
-            logger.info(f"✅ Redis connected: {config.REDIS_URL}")
+            logger.info("✅ Redis connected")
         except Exception as e:
             logger.warning(f"⚠️ Redis connection failed: {e}. Caching disabled.")
             self._connected = False

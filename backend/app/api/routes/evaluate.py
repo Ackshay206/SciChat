@@ -17,6 +17,7 @@ from app.api.schemas import (
     RagQualityMetrics,
     RetrieverMetrics,
 )
+from app.config import config
 from app.dependencies import app_state
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,10 @@ async def run_evaluation(request: EvaluateRequest):
 
     Developer/CI endpoint only.
     """
+    if config.DEMO_MODE:
+        raise HTTPException(status_code=403, detail="Evaluation is disabled in the hosted demo.")
+    if app_state.judge_llm is None:
+        raise HTTPException(status_code=503, detail="OPENAI_API_KEY is not configured.")
     if not app_state.has_index or not app_state.nodes:
         raise HTTPException(
             status_code=400,

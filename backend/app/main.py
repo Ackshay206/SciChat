@@ -9,11 +9,14 @@ Includes:
 """
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
+from app.config import config
 from app.dependencies import app_state
 from app.services.cache_service import cache_service
 from app.api.routes import health, ingest, query, documents, evaluate
@@ -63,7 +66,7 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=config.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,3 +78,7 @@ app.include_router(ingest.router, prefix="/api/v1", tags=["Ingestion"])
 app.include_router(query.router, prefix="/api/v1", tags=["Query"])
 app.include_router(documents.router, prefix="/api/v1", tags=["Documents"])
 app.include_router(evaluate.router, prefix="/api/v1", tags=["Evaluation"])
+
+# Built frontend (single-container deployment); mounted last so API routes take precedence
+if os.path.isdir("static"):
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")

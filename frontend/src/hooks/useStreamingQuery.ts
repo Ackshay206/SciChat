@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { API_BASE_URL } from '@/lib/api';
 
 export interface Message {
     id: string;
@@ -6,9 +7,9 @@ export interface Message {
     content: string;
     sources?: any[];
     isStreaming?: boolean;
+    latencyMs?: number;
+    cached?: boolean;
 }
-
-const API_URL = 'http://localhost:8000';
 
 interface UseStreamingQueryOptions {
     messages: Message[];
@@ -51,7 +52,7 @@ export function useStreamingQuery({ messages, setMessages, documentId }: UseStre
                 body.document_id = documentId;
             }
 
-            const response = await fetch(`${API_URL}/api/v1/query`, {
+            const response = await fetch(`${API_BASE_URL}/query`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
@@ -96,6 +97,14 @@ export function useStreamingQuery({ messages, setMessages, documentId }: UseStre
                                 prev.map(m =>
                                     m.id === assistantMessage.id
                                         ? { ...m, sources: data.content }
+                                        : m
+                                )
+                            );
+                        } else if (data.type === 'meta') {
+                            setMessages(prev =>
+                                prev.map(m =>
+                                    m.id === assistantMessage.id
+                                        ? { ...m, latencyMs: data.content.latency_ms, cached: data.content.cached }
                                         : m
                                 )
                             );

@@ -45,6 +45,7 @@ class AppState:
         self.query_engine: Optional[RetrieverQueryEngine] = None
         self.documents_metadata: Dict[str, Any] = {}  # doc_id -> metadata
         self.active_doc_id: Optional[str] = None  # Currently loaded document
+        self.engines: Dict[str, tuple] = {}  # doc_id -> (index, nodes, query_engine)
         self._initialized = False
 
     async def initialize(self) -> None:
@@ -89,6 +90,11 @@ class AppState:
             logger.info(f"📄 Document {doc_id} already active, skipping switch")
             return
 
+        if doc_id in self.engines:
+            self.index, self.nodes, self.query_engine = self.engines[doc_id]
+            self.active_doc_id = doc_id
+            return
+
         meta = self.documents_metadata.get(doc_id)
         if not meta:
             raise ValueError(f"Document '{doc_id}' not found in metadata")
@@ -96,7 +102,7 @@ class AppState:
         namespace = meta.get("namespace", f"doc_{doc_id}")
         logger.info(f"🔄 Switching to document: {meta.get('title', 'Unknown')} (namespace: {namespace})")
 
-        from app.core.indexing import load_existing_index
+        from app.core.indexing import load_existing_index, load_namespace_nodes
         from app.core.retrieval import create_query_engine
 
         # Load index from existing Pinecone namespace (no re-embedding)
@@ -105,15 +111,16 @@ class AppState:
             namespace=namespace,
         )
 
-        # Rebuild query engine — use vector-only since we don't have
-        # the original text nodes for BM25 (hybrid requires nodes)
+        # Rebuild text nodes from Pinecone metadata so BM25 (hybrid) works for loaded documents
+        self.nodes = load_namespace_nodes(namespace)
         self.query_engine = create_query_engine(
             index=self.index,
-            nodes=[],
+            nodes=self.nodes,
             llm=self.llm,
-            retriever_type="vector",
+            retriever_type="hybrid" if self.nodes else "vector",
         )
 
+        self.engines[doc_id] = (self.index, self.nodes, self.query_engine)
         self.active_doc_id = doc_id
         logger.info(f"✅ Switched to document: {meta.get('title', 'Unknown')}")
 
