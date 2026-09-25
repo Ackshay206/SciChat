@@ -1,0 +1,26 @@
+# Files not uploaded to Cloud Build (same exclusions as .dockerignore)
+.gcloudignore
+.gitignore
+**/.env
+**/.env.*
+!**/.env.example
+**/venv
+**/.venv
+**/node_modules
+**/.next
+**/__pycache__
+**/.DS_Store
+/frontend
+backend/mlruns
+backend/eval_results.json
+backend/tests
+.git
+.github
+/data
+/experiments
+/results
+my_session.txt
+summary.md
+SCICHAT_DEPLOY_BRIEF.md
+paddle-document-parsing.py
+.vscode
