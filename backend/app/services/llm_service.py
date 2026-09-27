@@ -65,6 +65,24 @@ def init_embed_model() -> HuggingFaceEmbedding:
     return embed_model
 
 
+def configure_torch_threads() -> None:
+    """
+    Match PyTorch's thread count to the container's CPU quota.
+    In containers PyTorch sizes its thread pool from the visible host CPUs and ignores
+    OMP_NUM_THREADS, so on Cloud Run it would use 3 threads whatever vCPU count is allocated.
+    """
+    import torch
+
+    try:
+        with open("/sys/fs/cgroup/cpu.max") as f:
+            quota, period = f.read().split()
+        if quota != "max":
+            torch.set_num_threads(max(1, int(quota) // int(period)))
+    except (FileNotFoundError, ValueError):
+        pass
+    logger.info(f"✅ Torch threads: {torch.get_num_threads()}")
+
+
 def configure_settings(llm, embed_model) -> None:
     """Set global LlamaIndex settings."""
     Settings.llm = llm

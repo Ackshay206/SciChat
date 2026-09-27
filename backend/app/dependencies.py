@@ -24,6 +24,7 @@ from app.services.llm_service import (
     init_embed_model,
     init_judge_llm,
     configure_settings,
+    configure_torch_threads,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,7 @@ class AppState:
 
         # Validate config
         config.validate()
+        configure_torch_threads()
 
         # Initialize models
         self.llm = init_llm()

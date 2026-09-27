@@ -72,7 +72,7 @@ class Config:
     # Retrieval Configuration (from notebook Cells 11-12)
     # ============================================================
   
-    RETRIEVER_TOP_K: int = 50       # Top-k for all retrievers
+    RETRIEVER_TOP_K: int = 30       # Top-k for all retrievers
     RERANKER_TOP_N: int = 10        # Top-n after cross-encoder reranking
 
     RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"

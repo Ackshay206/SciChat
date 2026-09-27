@@ -23,6 +23,8 @@ from app.services.cache_service import cache_service
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+_queries_served = 0  # per-process count; 1 marks the first query after a cold start
+
 MAX_QUESTION_CHARS = 1000
 INJECTION_PATTERN = re.compile(
     r"ignore (all |any )?(the )?(previous|prior|above) (instructions|prompts?)"
@@ -71,6 +73,7 @@ async def query_rag(request: QueryRequest):
         return QueryResponse(answer=refusal)
 
     # Switch to the requested document's namespace if needed
+    switch_start = time.time()
     if request.document_id:
         try:
             app_state.switch_document(request.document_id)
@@ -95,18 +98,29 @@ async def query_rag(request: QueryRequest):
         embedding = app_state.embed_model.get_text_embedding(request.question)
         cached = await cache_service.get_cached_response(doc_id, request.question, embedding)
 
+    global _queries_served
+    _queries_served += 1
+    trace = {
+        "doc_id": doc_id,
+        "instance_query_n": _queries_served,
+        "switch_ms": (start - switch_start) * 1000,
+        "cache_lookup_ms": (time.time() - start) * 1000,
+    }
+
     if request.stream:
         return StreamingResponse(
-            _stream_response(engine, request.question, doc_id, embedding, cached, start),
+            _stream_response(engine, request.question, doc_id, embedding, cached, start, trace),
             media_type="text/event-stream",
         )
 
     if cached:
+        latency = (time.time() - start) * 1000
+        _log_trace({**trace, "cached": True, "total_ms": latency})
         return QueryResponse(
             answer=cached["answer"],
             sources=[SourceInfo(**s) for s in cached["sources"]],
             cached=True,
-            latency_ms=(time.time() - start) * 1000,
+            latency_ms=latency,
         )
 
     try:
@@ -114,6 +128,7 @@ async def query_rag(request: QueryRequest):
     except Exception as e:
         raise HTTPException(status_code=503, detail=_error_message(e))
     latency = (time.time() - start) * 1000
+    _log_trace({**trace, **result["timings"], "cached": False, "total_ms": latency})
 
     await cache_service.cache_response(
         doc_id, request.question, embedding, result["answer"], result["sources"]
@@ -135,12 +150,23 @@ def _sse_events(result: dict, meta: Optional[dict] = None):
     yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
 
-async def _stream_response(engine, question: str, doc_id: str, embedding, cached: Optional[dict], start: float):
+def _log_trace(trace: dict) -> dict:
+    """Emit one JSON line per query; Cloud Logging parses stdout JSON into queryable fields."""
+    trace = {k: round(v, 1) if isinstance(v, float) else v for k, v in trace.items()}
+    print(json.dumps({"event": "query_trace", **trace}), flush=True)
+    return trace
+
+
+async def _stream_response(engine, question: str, doc_id: str, embedding, cached: Optional[dict], start: float, trace: dict):
     """SSE stream generator."""
     try:
         result = cached or await aquery(engine, question)
 
-        meta = {"latency_ms": (time.time() - start) * 1000, "cached": bool(cached)}
+        trace = _log_trace({
+            **trace, **result.get("timings", {}),
+            "cached": bool(cached), "total_ms": (time.time() - start) * 1000,
+        })
+        meta = {"latency_ms": trace["total_ms"], "cached": bool(cached), "trace": trace}
         for event in _sse_events(result, meta):
             yield event
 
