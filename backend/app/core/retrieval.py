@@ -11,9 +11,10 @@ Contains:
 """
 
 import logging
+import time
 from typing import Any, Dict, List, Optional
 
-from llama_index.core import PromptTemplate, VectorStoreIndex
+from llama_index.core import PromptTemplate, QueryBundle, VectorStoreIndex
 from llama_index.core.postprocessor import SentenceTransformerRerank
 from llama_index.core.query_engine import CitationQueryEngine
 from llama_index.core.retrievers import QueryFusionRetriever
@@ -157,11 +158,22 @@ def create_all_retrievers(
 async def aquery(engine: CitationQueryEngine, question: str) -> Dict[str, Any]:
     """
     Async query wrapper that returns structured response.
+    Runs retrieve → rerank → generate as separate steps so each one can be timed.
 
     Returns:
-        Dict with answer, sources, and metadata
+        Dict with answer, sources, and per-step timings (ms)
     """
-    response = await engine.aquery(question)
+    query_bundle = QueryBundle(question)
+
+    t0 = time.perf_counter()
+    candidates = await engine.retriever.aretrieve(query_bundle)
+    t1 = time.perf_counter()
+    nodes = candidates
+    for postprocessor in engine._node_postprocessors:  # the cross-encoder reranker
+        nodes = await postprocessor.apostprocess_nodes(nodes, query_bundle=query_bundle)
+    t2 = time.perf_counter()
+    response = await engine.asynthesize(query_bundle, nodes)
+    t3 = time.perf_counter()
 
     sources = []
     for node in response.source_nodes:
@@ -177,6 +189,13 @@ async def aquery(engine: CitationQueryEngine, question: str) -> Dict[str, Any]:
     return {
         "answer": str(response),
         "sources": sources,
+        "timings": {
+            "retrieve_ms": (t1 - t0) * 1000,
+            "rerank_ms": (t2 - t1) * 1000,
+            "generate_ms": (t3 - t2) * 1000,
+            "candidates": len(candidates),
+            "context_chars": sum(len(n.node.get_content()) for n in response.source_nodes),
+        },
     }
 
 
