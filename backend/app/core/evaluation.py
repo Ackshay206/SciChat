@@ -42,7 +42,7 @@ async def evaluate_retrievers(
     qa_path: Optional[str] = None,
 ) -> List[RetrieverMetrics]:
     """
-    Evaluate all retrievers (Vector, BM25, Hybrid) on QA pairs, before and after reranking.
+    Evaluate all  retrievers (Vector, BM25, Hybrid) on QA pairs, before and after reranking.
 
     Steps:
     1. Load frozen question-context pairs from qa_path, or generate them (and save to qa_path)

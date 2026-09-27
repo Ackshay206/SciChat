@@ -8,6 +8,7 @@ Provides:
 """
 
 import logging
+import os
 from typing import Optional
 
 from llama_index.core import Settings
@@ -67,20 +68,34 @@ def init_embed_model() -> HuggingFaceEmbedding:
 
 def configure_torch_threads() -> None:
     """
-    Match PyTorch's thread count to the container's CPU quota.
+    Match PyTorch's thread count to the CPUs the container is actually allowed to use.
     In containers PyTorch sizes its thread pool from the visible host CPUs and ignores
     OMP_NUM_THREADS, so on Cloud Run it would use 3 threads whatever vCPU count is allocated.
+    Set TORCH_NUM_THREADS to the vCPU count on Cloud Run: during startup CPU boost the cgroup
+    quota is temporarily inflated, so reading it at startup overcounts.
     """
     import torch
 
-    try:
+    if os.getenv("TORCH_NUM_THREADS"):
+        torch.set_num_threads(int(os.environ["TORCH_NUM_THREADS"]))
+        logger.info(f"✅ Torch threads: {torch.get_num_threads()} (TORCH_NUM_THREADS)")
+        return
+
+    quota = period = None
+    try:  # cgroup v2
         with open("/sys/fs/cgroup/cpu.max") as f:
             quota, period = f.read().split()
-        if quota != "max":
-            torch.set_num_threads(max(1, int(quota) // int(period)))
-    except (FileNotFoundError, ValueError):
-        pass
-    logger.info(f"✅ Torch threads: {torch.get_num_threads()}")
+    except FileNotFoundError:
+        try:  # cgroup v1 (Cloud Run)
+            with open("/sys/fs/cgroup/cpu/cpu.cfs_quota_us") as f:
+                quota = f.read().strip()
+            with open("/sys/fs/cgroup/cpu/cpu.cfs_period_us") as f:
+                period = f.read().strip()
+        except FileNotFoundError:
+            pass
+    if quota and quota not in ("max", "-1"):
+        torch.set_num_threads(max(1, int(quota) // int(period)))
+    logger.info(f"✅ Torch threads: {torch.get_num_threads()} (cpu quota: {quota}/{period})")
 
 
 def configure_settings(llm, embed_model) -> None:
