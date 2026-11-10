@@ -67,6 +67,9 @@ jobs:
           MLFLOW_ALLOW_FILE_STORE: "true"
         run: |
           cd backend
+          # NLTK >= 3.10.4 refuses data dirs writable by other users, which includes LlamaIndex's
+          # bundled cache inside the runner's site-packages; give it a private dir instead
+          export NLTK_DATA="$HOME/nltk_data"
           python -m scripts.run_evaluation
 
       - name: Upload MLflow artifacts

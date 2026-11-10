@@ -15,6 +15,7 @@ Usage:
 
 import asyncio
 import json
+import logging
 import os
 import sys
 import time
@@ -31,6 +32,10 @@ from app.core.chunking import run_optimized_ingestion_pipeline
 from app.core.indexing import create_pinecone_index, wait_for_namespace
 from app.core.retrieval import create_query_engine
 from app.core.evaluation import evaluate_retrievers, evaluate_rag_quality
+
+# Show the app's INFO logs (e.g. how many frozen eval questions were skipped); third-party libraries stay at WARNING
+logging.basicConfig(level=logging.WARNING, format="%(levelname)-7s | %(name)s | %(message)s", force=True)
+logging.getLogger("app").setLevel(logging.INFO)
 
 # Paths
 PDF_PATH = os.environ.get("EVAL_PDF_PATH", "../data/attention_is_all_you_need.pdf")

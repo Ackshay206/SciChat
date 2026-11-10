@@ -167,8 +167,8 @@ def extract_authors(header_text: str, title: str = "") -> List[str]:
 # =============================================================================
 
 def extract_emails(header_text: str) -> List[str]:
-    """Extract email addresses from text."""
-    return list(set(re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", header_text)))
+    """Extract email addresses from text, deduplicated in order of appearance (stable chunk text and IDs)."""
+    return list(dict.fromkeys(re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", header_text)))
 
 
 # =============================================================================
