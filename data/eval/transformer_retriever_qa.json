@@ -1,101 +1,100 @@
 {
     "queries": {
-        "d63b9b73-7716-476f-859c-85fab74ad6d9": "Based on the provided context, here is a question for the upcoming quiz:",
+        "d63b9b73-7716-476f-859c-85fab74ad6d9": "Who are the authors listed for the paper titled \"Attention Is All You Need\"?",
         "b2267d30-7da3-434e-9d6b-88719060e752": "What BLEU score did the Transformer model achieve on the WMT 2014 English-to-German translation task, and how much did it improve over existing best results?",
-        "d06d535e-eed5-4c86-83be-c791ab462639": "Based on the provided context, here is 1 quiz question:",
+        "d06d535e-eed5-4c86-83be-c791ab462639": "According to the text, which two specific types of neural networks are firmly established as state-of-the-art approaches in sequence modeling and transduction problems?",
         "8178706e-090c-4d43-9485-b4c0a1522f95": "What contributions did Niki make to the development of the models according to the text?",
         "e648281f-bda1-470a-9f6c-ca536638ef45": "What inherent characteristic of recurrent models precludes parallelization within training examples, especially at longer sequence lengths?",
         "bece64d2-48b5-498c-ba6b-06b53821dd82": "What is the name of the proposed model architecture that eschews recurrence and relies entirely on an attention mechanism?",
-        "6a3febc5-33d2-4d32-b03c-304e11816c08": "Based on the provided context, here is a question for your quiz:",
+        "6a3febc5-33d2-4d32-b03c-304e11816c08": "How many operations are required in the Transformer to relate signals from two arbitrary input or output positions, and what mechanism is used to counteract the reduced effective resolution caused by averaging attention-weighted positions?",
         "953691df-7732-4ac5-86e4-60541ebb0f01": "What distinguishes the Transformer from previous transduction models in how it computes representations of its input and output?",
         "e008671c-dd06-4bb0-a353-706c43adce0b": "What is unique about the Transformer as a transduction model in terms of how it computes representations of its input and output, according to the text?",
         "b3e79483-dcee-4279-8623-f32800bc7363": "What role does the encoder play in the neural sequence transduction models described in the text?",
-        "78e47ed4-343a-4384-a193-2002516fa2c7": "Based on the provided context, here is a question for your quiz/examination:",
+        "78e47ed4-343a-4384-a193-2002516fa2c7": "How many identical layers make up the encoder stack, and what are the two sub-layers found in each layer?",
         "8de47ea0-2fe0-44ef-a1fe-6626451d2b94": "What is the dimension size ($d_{model}$) of the outputs produced by all sub-layers and embedding layers to facilitate residual connections in the model?",
         "bdb0de52-36f7-4fd3-8ffd-911ca4f44d8b": "What modification is made to the self-attention sub-layer in the decoder stack, and what is its purpose regarding the output predictions?",
-        "eb87ad8b-9122-4fed-bcfc-fcfeeb3bc43e": "Based on the provided context, here is a question for your quiz/examination:",
-        "158f24fe-f5ea-4fbf-8eaa-6cef459240ea": "Based on the provided context, here is a question for your quiz/examination:",
+        "eb87ad8b-9122-4fed-bcfc-fcfeeb3bc43e": "How is the output computed in an attention function according to the provided text?",
+        "158f24fe-f5ea-4fbf-8eaa-6cef459240ea": "What are the dimensions of the queries and keys used in Scaled Dot-Product Attention?",
         "3cbeed80-26b9-4a85-b99a-b894a9b114ab": "What is the formula used to compute the matrix of outputs for the attention function as provided in the context?",
-        "5c02e13c-420f-422f-8401-b4a5a0efabcf": "Based on the provided context, here is a question for your quiz/examination:",
+        "5c02e13c-420f-422f-8401-b4a5a0efabcf": "Why do the authors suspect that additive attention outperforms unscaled dot-product attention for larger values of $d_k$?",
         "c56ac301-ad23-4a17-9cb4-1f9ad95c2e09": "What purpose does multi-head attention serve regarding information from different representation subspaces, and why is this advantageous compared to using a single attention head?",
-        "cfb1fc22-da6a-4f80-88f0-13f822e0c5e6": "Based on the provided context, here is a question for your upcoming quiz:",
-        "c3d7a1c6-1c2d-4a0b-b07a-054545382018": "Based on the provided context, here is 1 quiz question:",
+        "cfb1fc22-da6a-4f80-88f0-13f822e0c5e6": "What are the dimensions of the projection matrices $W_Q^i$, $W_K^i$, and $W_V^i$?",
+        "c3d7a1c6-1c2d-4a0b-b07a-054545382018": "What is the dimension size used for $d_k$ and $d_v$ for each of the parallel attention heads?",
         "939261c5-a9ae-487f-a3f3-c5d52369141b": "In the Transformer model's encoder-decoder attention layers, where do the queries come from, and where do the memory keys and values come from?",
         "6a484ee2-f8ed-419b-8584-596af51f8cf7": "How is leftward information flow prevented in the decoder to preserve the auto-regressive property, and where is this implemented?",
         "a5c4411e-ae28-41a8-aec4-829e625793da": "What are the dimensionalities of the input/output ($d_{model}$) and the inner-layer ($d_{ff}$) in the position-wise feed-forward networks?",
-        "792e9fde-1b44-4054-97f8-dde20b13ad56": "Based on the provided context, here is 1 quiz question:",
-        "60a5e3ad-4fea-49b3-bbdc-da37102123f4": "Based on the provided context, here is a question for your quiz/examination:",
+        "792e9fde-1b44-4054-97f8-dde20b13ad56": "In the embedding layers, by what value do the models multiply the shared weight matrix?",
+        "60a5e3ad-4fea-49b3-bbdc-da37102123f4": "Why must positional encodings be added to the input embeddings in the model?",
         "9707416d-e98e-4b95-89bb-72391d651b27": "What is the per-layer complexity and maximum path length for a Convolutional layer according to Table 1?",
-        "bfb049bd-39c1-4e2e-b62d-34c3f805e8a8": "Based on the provided context, here is 1 quiz question:",
-        "3623f40c-b3ad-4ae0-8917-43b1a5af0fcb": "Based on the provided context, here is a question for your quiz/examination:",
+        "bfb049bd-39c1-4e2e-b62d-34c3f805e8a8": "Why did the authors choose sine and cosine functions of different frequencies for the positional encodings?",
+        "3623f40c-b3ad-4ae0-8917-43b1a5af0fcb": "Why did the authors choose the sinusoidal version for positional embeddings over learned positional embeddings?",
         "9b5450f8-6e80-42ca-9760-b1d27aaab617": "What are the three desiderata considered when comparing self-attention layers to recurrent and convolutional layers in sequence transduction encoders or decoders?",
-        "7312acf2-a33c-4d12-b0bf-9cb36bc4b287": "Based on the provided context, here is a question for your quiz:",
-        "d49cb6bb-68ad-47f8-8c1a-98430cbd2ce5": "Based on the provided context, here is a question for your quiz:",
+        "7312acf2-a33c-4d12-b0bf-9cb36bc4b287": "How does the path length between long-range dependencies in a self-attention layer compare to that in a recurrent layer in terms of sequentially executed operations?",
+        "d49cb6bb-68ad-47f8-8c1a-98430cbd2ce5": "What is the maximum path length when self-attention is restricted to a neighborhood of size $r$ centered around the respective output position?",
         "545741a6-a16f-4fe4-99d0-952473d67527": "What is the complexity of a separable convolution even when the kernel width $k$ is equal to $n$, and how does it compare to the approach taken in the model described?",
-        "e57f571c-1708-40a6-aa02-2c26ed0f58c5": "Based on the provided context, here is a quiz question:",
+        "e57f571c-1708-40a6-aa02-2c26ed0f58c5": "What are the side benefits of using self-attention in the models, as discussed in the text?",
         "52a10cab-57f7-4eb7-929c-5966583f944a": "What topic is described in section 5 regarding the models?",
         "7a73bfaf-17af-4244-a923-90184099a537": "What is the approximate size of the shared source-target vocabulary used for encoding sentences in the WMT 2014 English-German dataset?",
         "177466bf-5e0c-4d06-8b16-b193d1cdd590": "How long did it take to train the big models, and what was the duration of each training step for them?",
         "800011bd-fe0d-45e7-a520-19d39415215e": "What were the specific hyperparameter values used for $\\beta_1$, $\\beta_2$, and $\\epsilon$ with the Adam optimizer during training?",
         "abde8ab8-ebef-491c-a999-6dbb384fef70": "What is the dropout rate used for the base model's regularization, and where specifically is dropout applied within the encoder and decoder stacks according to the text?",
-        "7bcb54bd-f8de-4c43-86a5-f4e2e63e4efa": "Based on the provided context, here is a question for the upcoming quiz:",
+        "7bcb54bd-f8de-4c43-86a5-f4e2e63e4efa": "What training cost in FLOPs did the ConvS2S model require for the English-to-German (EN-DE) translation task?",
         "0393c84d-dda1-4922-abaa-4a5c11ccb5f2": "What is the BLEU score and training cost associated with the Transformer (base model) according to the provided text?",
         "3374efdf-eb1d-4907-98a4-ce2e12c2373b": "What value of label smoothing ($\\epsilon_{ls}$) was employed during training, and what effects did it have on the model's perplexity, accuracy, and BLEU score?",
-        "aedc776d-4284-48a4-be1b-08284dd58df3": "Based on the provided context, here is 1 question for an upcoming quiz:",
-        "ebd90457-9e22-4d50-8e96-d17778f72d4c": "Based on the provided context, here is 1 quiz question:",
+        "aedc776d-4284-48a4-be1b-08284dd58df3": "What is the primary topic discussed in section 6.1 of the provided document?",
+        "ebd90457-9e22-4d50-8e96-d17778f72d4c": "How did varying the number of attention heads and the attention key and value dimensions impact the model's performance on the English-to-German translation development set, newstest2013?",
         "bd9fd2e5-24ef-46b4-a2cb-d83c9b8a0441": "Based on Table 3, what is the BLEU score and perplexity (PPL) of the base model on the English-to-German translation development set (newstest2013)?",
-        "70d56346-4a6e-45d6-bc6b-16ab57a5bce8": "Based on the provided context, here is 1 quiz question:",
-        "bee7e16a-1b9d-4b19-b4e8-8b3f1b4e7680": "Based on the provided context, here is a quiz question:",
+        "70d56346-4a6e-45d6-bc6b-16ab57a5bce8": "What are the corresponding values for the configuration starting with 32 16 16 in section (A)?",
+        "bee7e16a-1b9d-4b19-b4e8-8b3f1b4e7680": "Based on Table 3 row (B), what is the effect of reducing the attention key size $d_k$ on model quality?",
         "92ccd50e-0d46-43f4-9675-a0a08d0716d1": "What effect did replacing the sinusoidal positional encoding with learned positional embeddings have on the base model?",
-        "bdc57b06-9c88-4470-9704-db0080124c35": "Based on the provided context, here is 1 question for an upcoming quiz:",
-        "0e87cb64-31ee-495d-9d60-5730ebb8b964": "Based on the context provided, here is 1 quiz question:",
+        "bdc57b06-9c88-4470-9704-db0080124c35": "What translation tasks achieved a new state of the art using the Transformer model, according to the conclusion?",
         "5a826e66-849a-46aa-9974-65e84b7b5e9c": "What BLEU score did the Transformer model achieve on the WMT 2014 English-to-German translation task, and how much did it improve over existing best results?",
-        "ac948f50-016b-4bac-875b-fc7210134eea": "Based on the provided context, here is 1 question for an upcoming quiz/examination:",
+        "ac948f50-016b-4bac-875b-fc7210134eea": "Who proposed replacing RNNs with self-attention and started the effort to evaluate this idea?",
         "aee3adca-bed8-46b6-9e44-74754e46911d": "What is the fundamental constraint of recurrent models that precludes parallelization within training examples, and how does the proposed Transformer model address this limitation?",
         "ace8c633-b089-4c2c-a16f-2c0c8f25458b": "What is the key distinguishing feature of the Transformer model compared to previous transduction models like Extended Neural GPU, ByteNet, and ConvS2S regarding how it computes representations of its input and output?",
         "a9a0e207-0f10-44fc-bbd5-1a98637e7b21": "What are the two sub-layers contained in each layer of the encoder stack?",
-        "414cd7a3-69b3-44e1-9fec-ac17187a6b3d": "Based on the provided context, here is a question for your quiz/examination:",
+        "414cd7a3-69b3-44e1-9fec-ac17187a6b3d": "What is the dimensionality of the outputs produced by all sub-layers and the embedding layers to facilitate residual connections in the Transformer model?",
         "99a5b859-d555-491d-9c34-d00a3605fef3": "According to the provided text, what is the formula used to compute the matrix of outputs for Scaled Dot-Product Attention when queries, keys, and values are packed into matrices $Q$, $K$, and $V$?",
         "6104cc3f-f39b-4c22-871b-b95036509e73": "What is the advantage of using multi-head attention instead of a single attention head, and how are the final values obtained after performing the parallel attention functions?",
-        "a495ad60-40b3-4839-abd7-96df190f7822": "Based on the provided context, here is 1 quiz question:",
+        "a495ad60-40b3-4839-abd7-96df190f7822": "In encoder-decoder attention layers, where do the queries come from, and where do the memory keys and values come from?",
         "dda7fc28-7eec-4e54-814d-4b61b235e810": "What are the dimensionalities of the input/output ($d_{model}$) and the inner-layer ($d_{ff}$) in the position-wise feed-forward networks?",
         "f21d5bbb-1f25-4510-a92e-bb04875060fa": "What mathematical functions of different frequencies are used for the positional encodings in this work, and why were they chosen over learned positional embeddings?",
-        "ca072c16-cada-41d3-9aa0-881f770c8c35": "Based on the provided context, here is a question for your quiz/examination:",
-        "ea54ed45-02c4-4e4d-b097-1b18a36f05ab": "Based on the provided context, here is a question for your quiz/examination:",
-        "c8442e2a-ee45-4224-9eee-eb53a44426c4": "Based on the provided context, here is a quiz question:",
-        "45e0269b-4959-49dc-8a6d-b18d991e099a": "Based on the provided context, here is a question for the upcoming quiz:",
+        "ca072c16-cada-41d3-9aa0-881f770c8c35": "According to the text, what are the three key desiderata considered when comparing self-attention layers to recurrent and convolutional layers for sequence transduction?",
+        "ea54ed45-02c4-4e4d-b097-1b18a36f05ab": "What dataset was used for training the English-French models, and how many sentences did it consist of?",
+        "c8442e2a-ee45-4224-9eee-eb53a44426c4": "What specific hardware configuration and how many GPUs were used to train the models?",
+        "45e0269b-4959-49dc-8a6d-b18d991e099a": "What was the value of the label smoothing ($\\epsilon_{ls}$) employed during training, and how did it affect the model's perplexity and BLEU score?",
         "2d81c315-b915-4f52-a1f6-62c881b5f59f": "What BLEU score was achieved by the big Transformer model on the WMT 2014 English-to-French translation task, and how long did it take to train the big English-to-German model on 8 P100 GPUs?",
         "738ae336-a438-4800-b6c2-19f22249c733": "What dropout rate was used for the Transformer (big) model trained for English-to-French translation, and how does it compare to the typical dropout rate mentioned?",
-        "f84d7a74-92c2-4897-9427-4105dcd19446": "Based on the provided context, here is a question for your quiz:",
-        "7e88cbfc-a21d-48d0-8152-76a1e172d749": "Based on the provided context, here is a question for your quiz/examination:",
-        "41afbfad-6152-4fcb-aa28-d96539793df0": "Who are the authors of the paper titled \"Neural machine translation by jointly learning to align and translate\"?",
-        "bd560f00-4e1c-4ea2-a31a-2c5f100af29a": "Based on the provided context, here is a quiz question:",
-        "3b34a382-7bb7-421a-a11e-da25bc955829": "Based on the provided context information, here is a question for your quiz/examination:",
-        "ef03acb8-5f89-4155-968a-f5292a8cacf2": "Based on the provided context, here is a quiz question:",
-        "5b327e8d-ca50-44a5-be03-19877841d61e": "Who are the authors of the paper titled \"Dropout: a simple way to prevent neural networks from overfitting\"?",
-        "3ddc6a7b-7650-4e68-93ee-b68a6ef4dcaf": "Based on the provided context, here is a question for your quiz/examination:",
-        "aae6d801-b1a6-40d9-8059-6b8386f37734": "Based on the provided context, here is 1 quiz question:",
-        "a0fc882e-0c46-4be0-a7d0-02446b533cbe": "Based on the provided context, here is a question for the upcoming quiz:",
-        "f85f8a75-e8f0-48c7-a025-9d8d4bb670d5": "Based on the provided context, here is a question for your quiz:",
-        "3a3c9429-f304-4ba3-808f-01c0563de944": "Based on the provided context information, here is a quiz question:",
-        "a46356b8-97fc-4631-833b-7e0e242fe8d4": "Based on the provided context information, here is a question for an upcoming quiz:",
-        "41dcca1d-77c6-4ff5-81d6-9a76613e4ac0": "Based on the provided context, here is a question for your quiz/examination:",
+        "f84d7a74-92c2-4897-9427-4105dcd19446": "Based on Table 3, what effect does reducing the attention key size $d_k$ have on model quality, and what does this suggest about the compatibility function?",
+        "7e88cbfc-a21d-48d0-8152-76a1e172d749": "What effect did replacing the sinusoidal positional encoding with learned positional embeddings have on the model?",
+        "41afbfad-6152-4fcb-aa28-d96539793df0": "How many training steps did the base and the big Transformer each run for, and what EN-DE BLEU score did each of the two models reach?",
+        "bd560f00-4e1c-4ea2-a31a-2c5f100af29a": "What dropout rate does the base model use, and what dropout rate was used for the big English-to-French model instead of the big model's usual rate?",
+        "3b34a382-7bb7-421a-a11e-da25bc955829": "Why do the authors say multiple attention heads are better than one, and how much worse was single-head attention in the model-variation experiments?",
+        "ef03acb8-5f89-4155-968a-f5292a8cacf2": "Why did the authors choose sinusoidal positional encodings over learned positional embeddings, and what development-set BLEU did the learned-embedding variant score compared with the base model?",
+        "5b327e8d-ca50-44a5-be03-19877841d61e": "What per-layer complexity and maximum path length does Table 1 give for restricted self-attention, and why do the authors suggest restricting attention to a neighborhood?",
+        "3ddc6a7b-7650-4e68-93ee-b68a6ef4dcaf": "How many layers are in the encoder and decoder stacks, what extra sub-layer does the decoder have, and in which three ways does the Transformer use multi-head attention?",
+        "aae6d801-b1a6-40d9-8059-6b8386f37734": "Which researcher is affiliated with the University of Toronto according to the provided text?",
+        "a0fc882e-0c46-4be0-a7d0-02446b533cbe": "What is the maximum path length for a convolutional layer type, where $n$ is the sequence length and $k$ is the kernel size?",
+        "f85f8a75-e8f0-48c7-a025-9d8d4bb670d5": "What is the BLEU score of the Transformer (big) model on the English-to-German (EN-DE) newstest2014 test?",
+        "3a3c9429-f304-4ba3-808f-01c0563de944": "Which dataset was used to evaluate the English-to-German translation development set metrics for the variations on the Transformer architecture in Table 3?",
+        "a46356b8-97fc-4631-833b-7e0e242fe8d4": "What is the PPL (dev) and BLEU (dev) score for the \"big\" model configuration trained for 300K steps?",
+        "41dcca1d-77c6-4ff5-81d6-9a76613e4ac0": "What is the mathematical formula provided in the text for the output of each sub-layer involving a residual connection and layer normalization?",
         "4da8cc94-3f21-4fd4-92bf-41f6868103dd": "Why is it necessary to scale the dot products by $\\sqrt{d_k}$ in the scaled dot-product attention mechanism, especially for larger values of $d_k$?",
         "8e93aae0-64dd-480d-b0e5-df4f43ca830b": "What does multi-head attention allow the model to do that is otherwise inhibited by averaging when using a single attention head?",
-        "a8dab457-ff61-4c5f-adb1-125e688f5938": "Based on the provided context, here is a question for your quiz/examination:",
+        "a8dab457-ff61-4c5f-adb1-125e688f5938": "How many parallel attention layers (heads) are employed in the Transformer model described in the text?",
         "62a6c665-7999-4f4c-80a8-c0a49aedbc85": "What are the dimensionalities of the input and output, as well as the inner-layer ($d_{ff}$), in the Feed-Forward Network described in the text?",
-        "edec8167-997a-4826-b2bf-ddc931707020": "Based on the provided context information, here is 1 quiz question:",
-        "4c7a8dcc-aff4-4f4e-b120-4b626f43b2e8": "Based on the provided context, here is a quiz question:",
-        "913898e2-ede3-4c6d-8134-c2aeba07db20": "Based on the provided context, here is 1 question for an upcoming quiz/examination:",
-        "ecd18c4c-8c7c-49c9-8c9d-871ae249c972": "What is the title of the research paper authored by Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E Hinton published in 2016?",
-        "99b9de6d-2e8a-407e-b3b5-535e10a36fd3": "Who are the authors of the paper titled \"Learning phrase representations using rnn encoder-decoder for statistical machine translation\"?",
-        "54f5efca-786e-42fb-9471-5b7e41ad55f8": "What are the publication year and journal/conference details for the paper titled \"Long short-term memory\" authored by Sepp Hochreiter and J\u00fcrgen Schmidhuber?",
-        "e6018424-2d50-4ee7-8114-c5241bf1e306": "Who are the authors of the research paper titled \"Neural machine translation in linear time\"?",
-        "c383e8a8-6c2c-4e48-8497-56647a53d230": "Based on the provided context, here is a question for your quiz:",
-        "533ca290-14b2-4931-ae2d-460f46b561b1": "What was the publication year of the arXiv preprint by Minh-Thang Luong, Hieu Pham, and Christopher D. Manning titled \"Effective approaches to attention-based neural machine translation\"?",
-        "52ed3c7e-6943-4e8f-864e-b7f5598c61cc": "Based on the provided context information, here is a quiz question:",
-        "704c9fd4-de0f-4d10-a04b-862e63616f81": "Who are the authors of the paper \"End-to-end memory networks\" published in Advances in Neural Information Processing Systems 28 (2015)?",
-        "da71c379-3a5a-4ad9-86fa-5fb063aaf5c9": "What is the title of the research paper authored by Yonghui Wu et al. published in 2016 (arXiv preprint arXiv:1609.08144)?"
+        "edec8167-997a-4826-b2bf-ddc931707020": "What are the specific components contained within the $N \\times$ repeating layers of the Encoder stack in the Transformer architecture?",
+        "4c7a8dcc-aff4-4f4e-b120-4b626f43b2e8": "What is the purpose of the Scale block in the Scaled Dot-Product Attention architecture?",
+        "913898e2-ede3-4c6d-8134-c2aeba07db20": "What is the function of the Concat block in the Multi-Head Attention architecture described in Figure 2?",
+        "ecd18c4c-8c7c-49c9-8c9d-871ae249c972": "What are d_model and the feed-forward inner dimension d_ff in the base model, and what values do they take in the big model?",
+        "99b9de6d-2e8a-407e-b3b5-535e10a36fd3": "How large were the English-German and English-French training datasets, and what EN-FR BLEU score did the base model reach?",
+        "54f5efca-786e-42fb-9471-5b7e41ad55f8": "Which Adam hyperparameters and how many warmup steps were used, and what label smoothing value was applied and how did it affect perplexity and BLEU?",
+        "e6018424-2d50-4ee7-8114-c5241bf1e306": "How does the decoder ensure that predictions for a position depend only on earlier positions, and how is the masking implemented inside scaled dot-product attention?",
+        "c383e8a8-6c2c-4e48-8497-56647a53d230": "What property of recurrent models limits parallelization, and how many sequential operations does a recurrent layer need compared with a self-attention layer?",
+        "533ca290-14b2-4931-ae2d-460f46b561b1": "What GPUs were the models trained on, how did the authors estimate training cost in FLOPs, and what training cost did they report for the big model?",
+        "52ed3c7e-6943-4e8f-864e-b7f5598c61cc": "How does the number of operations needed to relate two distant positions grow in ConvS2S and ByteNet, and what maximum path length does Table 1 give for convolutional layers?",
+        "704c9fd4-de0f-4d10-a04b-862e63616f81": "Where does d_model appear in the learning-rate schedule, and by what factor are the embedding weights multiplied?",
+        "da71c379-3a5a-4ad9-86fa-5fb063aaf5c9": "What three desiderata do the authors use to compare layer types, and what values does Table 1 give for self-attention on each of them?"
     },
     "corpus": {
         "664153a2287864aa523f2d1b09cc50d5": "## Paper Metadata\n\n**Title:** Attention Is All You Need\n\n**Authors:** Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, \u0141ukasz Kaiser, Illia Polosukhin\n\n**Contact:** lukaszkaiser@google.com, llion@google.com, usz@google.com, illia.polosukhin@gmail.com, avaswani@google.com, aidan@cs.toronto.edu, nikip@google.com, noam@google.com\n\n**Affiliations:** Google Brain; Google Research; University of Toronto\n\n",
@@ -146,7 +145,6 @@
         "fe2e807a8c3d91c8276784ffa7897891": "19 25.3 50 8 4.88 25.5 80 256 32 32 5.75 24.5 28 1024 128 128 4.66 26.0 168 1024 5.12 25.4 53 4096 4.75 26.2 90 (D) 0.0 5.77 24.6 0.2 4.95 25.5 0.0 4.67 25.3 0.2 5.47 25.7 (E) positional embedding instead of sinusoids 4.92 25.7 big 6 1024 4096 16 0.3 300K 4.33 26.4 213 In Table 3 rows (B), we observe that reducing the attention key size dk hurts model quality.",
         "964665d4737e6d172ab910673a31b672": "3 0.2 5.47 25.7 (E) positional embedding instead of sinusoids 4.92 25.7 big 6 1024 4096 16 0.3 300K 4.33 26.4 213 In Table 3 rows (B), we observe that reducing the attention key size dk hurts model quality. This suggests that determining compatibility is not easy and that a more sophisticated compatibility function than dot product may be bene\ufb01cial. We further observe in rows (C) and (D) that, as expected, bigger models are better, and dropout is very helpful in avoiding over-\ufb01tting. In row (E) we replace our sinusoidal positional encoding with learned positional embeddings [8], and observe nearly identical results to the base model. 7",
         "1cc90d4b98c659717da3bcbb9a2a7aab": "## 7 Conclusion\n\nIn this work, we presented the Transformer, the \ufb01rst sequence transduction model based entirely on attention, replacing the recurrent layers most commonly used in encoder-decoder architectures with multi-headed self-attention. For translation tasks, the Transformer can be trained signi\ufb01cantly faster than architectures based on recurrent or convolutional layers. On both WMT 2014 English-to-German and WMT 2014 English-to-French translation tasks, we achieve a new state of the art. In the former task our best model outperforms even all previously reported ensembles. We are excited about the future of attention-based models and plan to apply them to other tasks. We plan to extend the Transformer to problems involving input and output modalities other than text and to investigate local, restricted attention mechanisms to ef\ufb01ciently handle large inputs and outputs such as images, audio and video. Making generation less sequential is another research goals of ours. The code we used to train and evaluate our models is available at https://github.com/ tensorflow/tensor2tensor.",
-        "946b184a799623645d9a608ff76109e7": "## Acknowledgements",
         "00bdab0559abf001e3fe02d920dedc3e": "Attention Is All You Need\nAshish Vaswani\u2217\nGoogle Brain\navaswani@google.com\nNoam Shazeer\u2217\nGoogle Brain\nnoam@google.com\nNiki Parmar\u2217\nGoogle Research\nnikip@google.com\nJakob Uszkoreit\u2217\nGoogle Research\nusz@google.com\nLlion Jones\u2217\nGoogle Research\nllion@google.com\nAidan N. Gomez\u2217\u2020\nUniversity of Toronto\naidan@cs.toronto.edu\n\u0141ukasz Kaiser\u2217\nGoogle Brain\nlukaszkaiser@google.com\nIllia Polosukhin\u2217\u2021\nillia.polosukhin@gmail.com\nAbstract\nThe dominant sequence transduction models are based on complex recurrent or\nconvolutional neural networks that include an encoder and a decoder. The best\nperforming models also connect the encoder and decoder through an attention\nmechanism. We propose a new simple network architecture, the Transformer,\nbased solely on attention mechanisms, dispensing with recurrence and convolutions\nentirely. Experiments on two machine translation tasks show these models to\nbe superior in quality while being more parallelizable and requiring signi\ufb01cantly\nless time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-\nto-German translation task, improving over the existing best results, including\nensembles, by over 2 BLEU. On the WMT 2014 English-to-French translation task,\nour model establishes a new single-model state-of-the-art BLEU score of 41.0 after\ntraining for 3.5 days on eight GPUs, a small fraction of the training costs of the\nbest models from the literature.",
         "731678c5814eaa61c72f96dfa691dd95": "Introduction\nRecurrent neural networks, long short-term memory [12] and gated recurrent [7] neural networks\nin particular, have been \ufb01rmly established as state of the art approaches in sequence modeling and\ntransduction problems such as language modeling and machine translation [29, 2, 5]. Numerous\nefforts have since continued to push the boundaries of recurrent language models and encoder-decoder\narchitectures [31, 21, 13].\n\u2217Equal contribution. Listing order is random. Jakob proposed replacing RNNs with self-attention and started\nthe effort to evaluate this idea. Ashish, with Illia, designed and implemented the \ufb01rst Transformer models and\nhas been crucially involved in every aspect of this work. Noam proposed scaled dot-product attention, multi-head\nattention and the parameter-free position representation and became the other person involved in nearly every\ndetail. Niki designed, implemented, tuned and evaluated countless model variants in our original codebase and\ntensor2tensor. Llion also experimented with novel model variants, was responsible for our initial codebase, and\nef\ufb01cient inference and visualizations. Lukasz and Aidan spent countless long days designing various parts of and\nimplementing tensor2tensor, replacing our earlier codebase, greatly improving results and massively accelerating\nour research.\n\u2020Work performed while at Google Brain.\n\u2021Work performed while at Google Research.\n31st Conference on Neural Information Processing Systems (NIPS 2017), Long Beach, CA, USA.",
         "92d12a2ca494a852ad0ec69a8e58ef70": "Recurrent models typically factor computation along the symbol positions of the input and output\nsequences. Aligning the positions to steps in computation time, they generate a sequence of hidden\nstates ht, as a function of the previous hidden state ht\u22121 and the input for position t. This inherently\nsequential nature precludes parallelization within training examples, which becomes critical at longer\nsequence lengths, as memory constraints limit batching across examples. Recent work has achieved\nsigni\ufb01cant improvements in computational ef\ufb01ciency through factorization tricks [18] and conditional\ncomputation [26], while also improving model performance in case of the latter. The fundamental\nconstraint of sequential computation, however, remains.\nAttention mechanisms have become an integral part of compelling sequence modeling and transduc-\ntion models in various tasks, allowing modeling of dependencies without regard to their distance in\nthe input or output sequences [2, 16]. In all but a few cases [22], however, such attention mechanisms\nare used in conjunction with a recurrent network.\nIn this work we propose the Transformer, a model architecture eschewing recurrence and instead\nrelying entirely on an attention mechanism to draw global dependencies between input and output.\nThe Transformer allows for signi\ufb01cantly more parallelization and can reach a new state of the art in\ntranslation quality after being trained for as little as twelve hours on eight P100 GPUs.",
@@ -340,9 +338,6 @@
         "bdc57b06-9c88-4470-9704-db0080124c35": [
             "1cc90d4b98c659717da3bcbb9a2a7aab"
         ],
-        "0e87cb64-31ee-495d-9d60-5730ebb8b964": [
-            "946b184a799623645d9a608ff76109e7"
-        ],
         "5a826e66-849a-46aa-9974-65e84b7b5e9c": [
             "00bdab0559abf001e3fe02d920dedc3e"
         ],
@@ -401,22 +396,28 @@
             "ba6012f272e1c6963013f8cfddb0fd0d"
         ],
         "41afbfad-6152-4fcb-aa28-d96539793df0": [
-            "96e02c9f403ef867a8b6cb1c982b3078"
+            "a7e7d43260573e5f99327c29fb403174",
+            "f0a99425d6f949ef1a53a6970cb2a927"
         ],
         "bd560f00-4e1c-4ea2-a31a-2c5f100af29a": [
-            "89fd2945dbaf31787d80e33e86a69577"
+            "f8ba9e745e109c1be9ef2a2f3bb9e445",
+            "ad184eb2463a61efbf35bfdc76acbff6"
         ],
         "3b34a382-7bb7-421a-a11e-da25bc955829": [
-            "e4083330f8d0ee19c63758f489f35f92"
+            "412d4c52749d129f93450c70434ad704",
+            "c878000f79b3f5027b2892cdd9069601"
         ],
         "ef03acb8-5f89-4155-968a-f5292a8cacf2": [
-            "cb1874618d1c7e1d2046f107f13b0ecc"
+            "65b9d0bbde42f80e9f1c45c49b9e6aae",
+            "699f5d712cfb30a1087136f0e42bad7b"
         ],
         "5b327e8d-ca50-44a5-be03-19877841d61e": [
-            "bbb3f347ae7cd50c1353f1713eabdd6c"
+            "fcab61741a72702ee2a6bbca6746c18f",
+            "985cb3768b5410954592127921813428"
         ],
         "3ddc6a7b-7650-4e68-93ee-b68a6ef4dcaf": [
-            "32cefc44f679c908d9204ee498f94061"
+            "51dcc00c32ba23425bc7d406762c7bfd",
+            "96565c994f54cf25559563e62734959a"
         ],
         "aae6d801-b1a6-40d9-8059-6b8386f37734": [
             "ef84cb7cea5d383eb2d78bce7cf0928f"
@@ -458,31 +459,41 @@
             "e57e11b9aa77079857f92b80049a78e8"
         ],
         "ecd18c4c-8c7c-49c9-8c9d-871ae249c972": [
-            "ca5dd3e6119bc94af98c962f7c5433e8"
+            "2fca03bdd3d8e18f68c47a6a09fdc8b8",
+            "699f5d712cfb30a1087136f0e42bad7b"
         ],
         "99b9de6d-2e8a-407e-b3b5-535e10a36fd3": [
-            "959d7c2db7d8cc7be9b4c25d9878d555"
+            "6e7ad74984140ddf3f932cebaa911009",
+            "f0a99425d6f949ef1a53a6970cb2a927"
         ],
         "54f5efca-786e-42fb-9471-5b7e41ad55f8": [
-            "c9ca0beaf304f64c2a5085e38c6043ed"
+            "91477dca689c3b2889bc6bbb4ec2503f",
+            "2e2b75804d41970bd334044c06f3366f"
         ],
         "e6018424-2d50-4ee7-8114-c5241bf1e306": [
-            "11a1f802101cd6e38a2f03fe4bc98b83"
+            "f683f8781b8491207d95f19c9d806503",
+            "0b98948693d54022fb98311e37cfa9b9"
         ],
         "c383e8a8-6c2c-4e48-8497-56647a53d230": [
-            "f31246b93f412798a03d6aeda829f8b8"
+            "2ef8d6247149a1d27d52f3580d29099c",
+            "c07c9ceac713fd5577ce1e7cc455f937"
         ],
         "533ca290-14b2-4931-ae2d-460f46b561b1": [
-            "4e2edc2f8ffc60620bd2b8a9719aa987"
+            "a7e7d43260573e5f99327c29fb403174",
+            "ad184eb2463a61efbf35bfdc76acbff6",
+            "f0a99425d6f949ef1a53a6970cb2a927"
         ],
         "52ed3c7e-6943-4e8f-864e-b7f5598c61cc": [
-            "49f3b58d3ef756dcd27d80ab114f5930"
+            "3ad6af23b32828149721f2c43955147b",
+            "fcab61741a72702ee2a6bbca6746c18f"
         ],
         "704c9fd4-de0f-4d10-a04b-862e63616f81": [
-            "a5fb0133023d8207aabc650fc2277b07"
+            "91477dca689c3b2889bc6bbb4ec2503f",
+            "7950d50d305e9f74a404e415600ee824"
         ],
         "da71c379-3a5a-4ad9-86fa-5fb063aaf5c9": [
-            "ab98fd18068f821baa4b15528fb5dbda"
+            "5529fe4738365bc486e377d5a7dd911a",
+            "fcab61741a72702ee2a6bbca6746c18f"
         ]
     },
     "mode": "text"
