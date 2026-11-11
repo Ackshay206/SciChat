@@ -105,7 +105,7 @@ class Config:
     # ============================================================
     GOLD_QA_PATH: str = "data/eval/transformer_gold_qa_50.txt"
     EVAL_METRICS_RETRIEVER: list = field(
-        default_factory=lambda: ["mrr", "hit_rate", "precision", "recall"]
+        default_factory=lambda: ["mrr", "hit_rate", "precision", "recall", "ndcg"]
     )
 
     # ============================================================

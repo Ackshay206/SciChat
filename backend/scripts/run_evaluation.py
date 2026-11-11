@@ -143,9 +143,10 @@ async def main():
                 f"{prefix}_hit_rate": round(m.hit_rate, 4),
                 f"{prefix}_precision": round(m.precision, 4),
                 f"{prefix}_recall": round(m.recall, 4),
+                f"{prefix}_ndcg": round(m.ndcg, 4),
             })
             print(f"   {m.retriever_name}: MRR={m.mrr:.3f} HitRate={m.hit_rate:.3f} "
-                  f"Precision={m.precision:.3f} Recall={m.recall:.3f}")
+                  f"Precision={m.precision:.3f} Recall={m.recall:.3f} NDCG={m.ndcg:.3f}")
 
         # ── Step 6: RAG Quality Evaluation ─────────────────────────
         t0 = time.time()
@@ -158,10 +159,12 @@ async def main():
             "rag_eval_time_s": round(rag_time, 2),
             "avg_faithfulness": round(rag_metrics.avg_faithfulness, 4),
             "avg_relevancy": round(rag_metrics.avg_relevancy, 4),
+            "avg_context_relevance": round(rag_metrics.avg_context_relevance, 4),
             "num_questions_evaluated": rag_metrics.num_questions,
         })
         print(f"   Faithfulness: {rag_metrics.avg_faithfulness:.3f}")
         print(f"   Relevancy:    {rag_metrics.avg_relevancy:.3f}")
+        print(f"   Context relevance: {rag_metrics.avg_context_relevance:.3f}")
         print(f"   Questions:    {rag_metrics.num_questions}")
 
         # ── Total pipeline time ────────────────────────────────────
@@ -172,12 +175,13 @@ async def main():
         results = {
             "retriever_metrics": [
                 {"name": m.retriever_name, "mrr": m.mrr, "hit_rate": m.hit_rate,
-                 "precision": m.precision, "recall": m.recall}
+                 "precision": m.precision, "recall": m.recall, "ndcg": m.ndcg}
                 for m in retriever_metrics
             ],
             "rag_quality": {
                 "faithfulness": rag_metrics.avg_faithfulness,
                 "relevancy": rag_metrics.avg_relevancy,
+                "context_relevance": rag_metrics.avg_context_relevance,
             },
             "timing": {
                 "parse_s": round(parse_time, 2),

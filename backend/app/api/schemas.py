@@ -80,11 +80,13 @@ class RetrieverMetrics(BaseModel):
     hit_rate: float = 0.0
     precision: float = 0.0
     recall: float = 0.0
+    ndcg: float = 0.0
 
 
 class RagQualityMetrics(BaseModel):
     avg_faithfulness: float = 0.0
     avg_relevancy: float = 0.0
+    avg_context_relevance: float = 0.0
     num_questions: int = 0
 
 

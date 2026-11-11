@@ -111,13 +111,15 @@ async def evaluate_retrievers(
             hit_rate=metrics.get("hit_rate", 0.0),
             precision=metrics.get("precision", 0.0),
             recall=metrics.get("recall", 0.0),
+            ndcg=metrics.get("ndcg", 0.0),
         ))
 
         logger.info(
             f"   {name}: MRR={metrics.get('mrr', 0):.3f}, "
             f"HitRate={metrics.get('hit_rate', 0):.3f}, "
             f"Precision={metrics.get('precision', 0):.3f}, "
-            f"Recall={metrics.get('recall', 0):.3f}"
+            f"Recall={metrics.get('recall', 0):.3f}, "
+            f"NDCG={metrics.get('ndcg', 0):.3f}"
         )
 
     return results
@@ -162,6 +164,24 @@ def load_gold_qa_questions(qa_path: Optional[str] = None) -> List[Dict[str, str]
     return questions
 
 
+CONTEXT_RELEVANCE_PROMPT = (
+    "Question: {question}\n\n"
+    "Passage:\n{passage}\n\n"
+    "Does this passage contain information that helps answer the question? Answer only YES or NO."
+)
+
+
+async def judge_context_relevance(judge_llm, question: str, source_nodes) -> float:
+    """Share of the passages given to the LLM that the judge finds relevant to the question (one call per passage)."""
+    if not source_nodes:
+        return 0.0
+    replies = await asyncio.gather(*(
+        judge_llm.acomplete(CONTEXT_RELEVANCE_PROMPT.format(question=question, passage=n.node.get_content()))
+        for n in source_nodes
+    ))
+    return sum(str(r).strip().upper().startswith("YES") for r in replies) / len(replies)
+
+
 async def evaluate_rag_quality(
     query_engine: RetrieverQueryEngine,
     judge_llm,
@@ -169,7 +189,7 @@ async def evaluate_rag_quality(
 ) -> RagQualityMetrics:
     """
     Evaluate RAG quality using gold QA dataset.
-    Measures Faithfulness and Relevancy using LLM judge.
+    Measures Faithfulness, Relevancy and Context Relevance using LLM judge.
 
     From notebook Cell 15 — adapted for async.
     """
@@ -183,6 +203,7 @@ async def evaluate_rag_quality(
 
     total_faithfulness = 0.0
     total_relevancy = 0.0
+    total_context_relevance = 0.0
     evaluated = 0
 
     for i, qa in enumerate(questions):
@@ -202,25 +223,35 @@ async def evaluate_rag_quality(
             )
             rel_score = rel_result.score if rel_result.score is not None else 0.0
 
+            # Evaluate context relevance of the passages the LLM saw
+            ctx_score = await judge_context_relevance(judge_llm, qa["question"], response.source_nodes)
+
             total_faithfulness += faith_score
             total_relevancy += rel_score
+            total_context_relevance += ctx_score
             evaluated += 1
 
-            logger.info(f"   Q{i+1}: Faithfulness={faith_score:.2f}, Relevancy={rel_score:.2f}")
+            logger.info(
+                f"   Q{i+1}: Faithfulness={faith_score:.2f}, Relevancy={rel_score:.2f}, "
+                f"ContextRelevance={ctx_score:.2f} ({len(response.source_nodes)} passages)"
+            )
 
         except Exception as e:
             logger.error(f"   ❌ Error evaluating Q{i+1}: {e}")
 
     avg_faithfulness = total_faithfulness / evaluated if evaluated > 0 else 0.0
     avg_relevancy = total_relevancy / evaluated if evaluated > 0 else 0.0
+    avg_context_relevance = total_context_relevance / evaluated if evaluated > 0 else 0.0
 
     logger.info(f"\n📊 RAG QUALITY SUMMARY:")
     logger.info(f"   Avg Faithfulness: {avg_faithfulness:.3f}")
     logger.info(f"   Avg Relevancy: {avg_relevancy:.3f}")
+    logger.info(f"   Avg Context Relevance: {avg_context_relevance:.3f}")
     logger.info(f"   Questions evaluated: {evaluated}/{len(questions)}")
 
     return RagQualityMetrics(
         avg_faithfulness=avg_faithfulness,
         avg_relevancy=avg_relevancy,
+        avg_context_relevance=avg_context_relevance,
         num_questions=evaluated,
     )
