@@ -20,8 +20,9 @@ def clean_text(text: str) -> str:
     text = re.sub(r'\n{3,}', '\n\n', text)
     # Remove page numbers (standalone numbers on a line)
     text = re.sub(r'^\s*\d+\s*$', '', text, flags=re.MULTILINE)
-    # Remove header/footer artifacts (common in academic papers)
-    text = re.sub(r'^.*(?:Published|Preprint|Draft|Confidential).*$', '', text, flags=re.MULTILINE | re.IGNORECASE)
+    # Remove header/footer artifacts (common in academic papers): short lines that START with these words,
+    # e.g. "Published as a conference paper at ICLR". Body text that merely mentions "published" is kept.
+    text = re.sub(r'^\s*(?:Published|Preprint|Draft|Confidential|PUBLISHED|PREPRINT|DRAFT|CONFIDENTIAL)\b.{0,100}$', '', text, flags=re.MULTILINE)
     # Normalize whitespace within lines
     text = re.sub(r'[ \t]+', ' ', text)
     # Clean up resulting empty lines

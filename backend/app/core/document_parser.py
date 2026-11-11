@@ -670,12 +670,16 @@ def extract_all_sections(doc, full_text: str) -> List[Dict[str, Any]]:
 # =============================================================================
 
 def extract_sections_content(full_text: str, sections: List[Dict]) -> List[Dict]:
-    """Extract content for each section using normalized lines."""
+    """Extract content for each section using normalized lines. A section ends at the References heading
+    (references are indexed separately by extract_references_from_pdf) or at a NeurIPS checklist."""
     lines = _get_normalized_lines(full_text)
+    stop = ("references", "bibliography", "reference", "neurips paper checklist")
+    ref_lines = [i for i, ln in enumerate(lines) if ln.lower() in stop]
     results = []
     for i, sec in enumerate(sections):
         start = sec.get("line_number", 0)
         end = sections[i + 1].get("line_number", len(lines)) if i + 1 < len(sections) else len(lines)
+        end = min([end] + [r for r in ref_lines if r > start])
         content = "\n".join(lines[start + 1:end])
         results.append({**sec, "content": content.strip()})
     return results
@@ -779,8 +783,11 @@ def extract_structured_text_from_pdf(pdf_path: str, structure: Dict[str, Any]) -
     # Extract text by sections
     doc = fitz.open(pdf_path)
     full_text = ""
+    line_pages = []  # 1-based page of each normalized line (the lines section line_numbers index into)
     for page_num in range(len(doc)):
-        full_text += doc[page_num].get_text("text") + "\n\n"
+        page_text = doc[page_num].get_text("text")
+        full_text += page_text + "\n\n"
+        line_pages += [page_num + 1] * len(_get_normalized_lines(page_text))
     doc.close()
 
     if structure["sections"]:
@@ -799,7 +806,11 @@ def extract_structured_text_from_pdf(pdf_path: str, structure: Dict[str, Any]) -
                         "content_type": "section",
                         "section_name": name,
                         "section_number": sec.get("number", ""),
-                    }
+                        "page": line_pages[min(sec.get("line_number", 0), len(line_pages) - 1)],  # page the section starts on
+                    },
+                    # page is for citations only; keeping it out of the embedded/LLM text leaves chunk boundaries (and IDs) unchanged
+                    excluded_embed_metadata_keys=["page"],
+                    excluded_llm_metadata_keys=["page"],
                 ))
 
     logger.info(f"   ✅ {len(documents)} structured documents created")
@@ -834,6 +845,25 @@ def extract_text_from_pdf(pdf_path: str) -> List[Document]:
     doc.close()
     logger.info(f"   ✅ {len(documents)} pages extracted")
     return documents
+
+
+def _phrases(text: str, n: int = 8) -> set:
+    """Overlapping n-word phrases (lowercase, punctuation ignored), for measuring how much text two docs share."""
+    words = re.findall(r"[a-z0-9]+", text.lower())
+    return {" ".join(words[i:i + n]) for i in range(len(words) - n + 1)}
+
+
+def drop_pages_covered_elsewhere(page_docs: List[Document], other_docs: List[Document],
+                                 min_coverage: float = 0.9) -> List[Document]:
+    """
+    Drop page documents whose text is already in other documents (sections, references), so the same text
+    isn't indexed twice. A page is kept when less than min_coverage of its 8-word phrases appear elsewhere,
+    which keeps text only the page has (e.g. title block, checklists, or anything section detection missed).
+    """
+    covered = set().union(*(_phrases(d.text) for d in other_docs))
+    kept = [d for d in page_docs if not (p := _phrases(d.text)) or len(p & covered) / len(p) < min_coverage]
+    logger.info(f"   🧹 Dropped {len(page_docs) - len(kept)} of {len(page_docs)} pages already covered by sections/references")
+    return kept
 
 
 # =============================================================================
@@ -1177,7 +1207,7 @@ def collect_all_documents(pdf_path: str) -> List[Document]:
     Flow:
     1. Structure Analysis (title, authors, emails, organizations, abstract, sections)
     2. Structured Text Extraction (metadata, abstract, sections as separate docs)
-    3. Full Text Extraction (page-by-page)
+    3. Full Text Extraction (page-by-page; pages already covered by sections/references are dropped after step 8)
     4. Table Extraction (hybrid with junk filter)
     5. Figure Extraction (page-level rendering)
     6. OCR (per-figure-page)
@@ -1198,8 +1228,7 @@ def collect_all_documents(pdf_path: str) -> List[Document]:
     all_docs.extend(structured_docs)
 
     # Step 3: Full Text Extraction
-    text_docs = extract_text_from_pdf(pdf_path)
-    all_docs.extend(text_docs)
+    text_docs = extract_text_from_pdf(pdf_path)  # added after step 8, once references exist
 
     # Step 4: Table Extraction
     table_docs = extract_tables_from_pdf(pdf_path)
@@ -1223,6 +1252,10 @@ def collect_all_documents(pdf_path: str) -> List[Document]:
     # Step 8: Reference Extraction
     ref_docs = extract_references_from_pdf(pdf_path)
     all_docs.extend(ref_docs)
+
+    # Keep only pages with text the section/reference docs don't already have (avoids duplicate chunks)
+    text_docs = drop_pages_covered_elsewhere(text_docs, structured_docs + ref_docs)
+    all_docs.extend(text_docs)
 
     # Summary
     logger.info("\n" + "-" * 40)
