@@ -84,7 +84,17 @@ export function useStreamingQuery({ messages, setMessages, documentId }: UseStre
                     try {
                         const data = JSON.parse(trimmed.slice(6));
 
-                        if (data.type === 'answer') {
+                        if (data.type === 'token') {
+                            // Append each piece of the answer as it arrives
+                            setMessages(prev =>
+                                prev.map(m =>
+                                    m.id === assistantMessage.id
+                                        ? { ...m, content: (m.content || '') + data.content }
+                                        : m
+                                )
+                            );
+                        } else if (data.type === 'answer') {
+                            // Full answer (after the tokens, or on its own for cached answers and refusals)
                             setMessages(prev =>
                                 prev.map(m =>
                                     m.id === assistantMessage.id

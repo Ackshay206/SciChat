@@ -17,6 +17,8 @@ from typing import Any, Dict, List, Optional
 from llama_index.core import PromptTemplate, QueryBundle, VectorStoreIndex
 from llama_index.core.postprocessor import SentenceTransformerRerank
 from llama_index.core.query_engine import CitationQueryEngine
+from llama_index.core.query_engine.citation_query_engine import CITATION_REFINE_TEMPLATE
+from llama_index.core.response_synthesizers import ResponseMode, get_response_synthesizer
 from llama_index.core.retrievers import QueryFusionRetriever
 from llama_index.retrievers.bm25 import BM25Retriever
 
@@ -175,20 +177,9 @@ async def aquery(engine: CitationQueryEngine, question: str) -> Dict[str, Any]:
     response = await engine.asynthesize(query_bundle, nodes)
     t3 = time.perf_counter()
 
-    sources = []
-    for node in response.source_nodes:
-        sources.append({
-            "text": node.node.text[:500],  # Truncate for API response
-            "score": float(node.score) if node.score is not None else 0.0,
-            "metadata": {
-                k: v for k, v in node.node.metadata.items()
-                if k in ["content_type", "type", "section_name", "page", "table_index"]
-            },
-        })
-
     return {
         "answer": str(response),
-        "sources": sources,
+        "sources": _format_sources(response.source_nodes),
         "timings": {
             "retrieve_ms": (t1 - t0) * 1000,
             "rerank_ms": (t2 - t1) * 1000,
@@ -199,35 +190,64 @@ async def aquery(engine: CitationQueryEngine, question: str) -> Dict[str, Any]:
     }
 
 
+def _format_sources(source_nodes) -> List[Dict[str, Any]]:
+    """Source passages for the API response (text truncated, whitelisted metadata)."""
+    return [{
+        "text": node.node.text[:500],
+        "score": float(node.score) if node.score is not None else 0.0,
+        "metadata": {
+            k: v for k, v in node.node.metadata.items()
+            if k in ["content_type", "type", "section_name", "page", "table_index"]
+        },
+    } for node in source_nodes]
+
+
 async def aquery_streaming(engine: CitationQueryEngine, question: str):
     """
-    Async streaming query for SSE responses.
-    Yields token chunks as they arrive.
-
-    Used by the /query endpoint when stream=true.
+    Streaming version of aquery, used by the /query endpoint when stream=true.
+    Yields {"type": "token", "content": str} for each piece of the answer as Gemini produces it, then one
+    {"type": "result", ...} with the same answer/sources/timings as aquery, plus llm_ttft_ms
+    (from sending the prompt to the first token).
     """
-    streaming_response = await engine.aquery(question)
+    query_bundle = QueryBundle(question)
 
-    # For SSE, we yield the full response and sources
-    # LlamaIndex streaming is handled at the LLM level
+    t0 = time.perf_counter()
+    candidates = await engine.retriever.aretrieve(query_bundle)
+    t1 = time.perf_counter()
+    nodes = candidates
+    for postprocessor in engine._node_postprocessors:  # the cross-encoder reranker
+        nodes = await postprocessor.apostprocess_nodes(nodes, query_bundle=query_bundle)
+    t2 = time.perf_counter()
+
+    # Same synthesizer CitationQueryEngine.from_args builds, but streaming. Built per request (cheap, no model load)
+    # so the shared non-streaming engine used by /query?stream=false and the evaluation stays untouched.
+    synthesizer = get_response_synthesizer(
+        llm=engine._response_synthesizer._llm,
+        text_qa_template=GROUNDED_CITATION_TEMPLATE,
+        refine_template=CITATION_REFINE_TEMPLATE,
+        response_mode=ResponseMode.COMPACT,
+        streaming=True,
+    )
+    response = await synthesizer.asynthesize(query=query_bundle, nodes=engine._create_citation_nodes(nodes))
+
+    tokens, t_first = [], None
+    async for token in response.async_response_gen():
+        if t_first is None:
+            t_first = time.perf_counter()
+        tokens.append(token)
+        yield {"type": "token", "content": token}
+    t3 = time.perf_counter()
+
     yield {
-        "type": "answer",
-        "content": str(streaming_response),
-    }
-
-    # Yield sources after the answer
-    sources = []
-    for node in streaming_response.source_nodes:
-        sources.append({
-            "text": node.node.text[:500],
-            "score": node.score,
-            "metadata": {
-                k: v for k, v in node.node.metadata.items()
-                if k in ["content_type", "type", "section_name", "page", "table_index"]
-            },
-        })
-
-    yield {
-        "type": "sources",
-        "content": sources,
+        "type": "result",
+        "answer": "".join(tokens),
+        "sources": _format_sources(response.source_nodes),
+        "timings": {
+            "retrieve_ms": (t1 - t0) * 1000,
+            "rerank_ms": (t2 - t1) * 1000,
+            "llm_ttft_ms": ((t_first or t3) - t2) * 1000,
+            "generate_ms": (t3 - t2) * 1000,
+            "candidates": len(candidates),
+            "context_chars": sum(len(n.node.get_content()) for n in response.source_nodes),
+        },
     }

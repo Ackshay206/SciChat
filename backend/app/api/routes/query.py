@@ -16,7 +16,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.api.schemas import QueryRequest, QueryResponse, SourceInfo
-from app.core.retrieval import aquery
+from app.core.retrieval import aquery, aquery_streaming
 from app.dependencies import app_state
 from app.services.cache_service import cache_service
 
@@ -158,9 +158,18 @@ def _log_trace(trace: dict) -> dict:
 
 
 async def _stream_response(engine, question: str, doc_id: str, embedding, cached: Optional[dict], start: float, trace: dict):
-    """SSE stream generator."""
+    """SSE stream generator: answer tokens as they arrive, then the full answer, sources and trace.
+    The final full-answer event keeps clients that ignore "token" events working."""
     try:
-        result = cached or await aquery(engine, question)
+        result = cached
+        if not cached:
+            async for event in aquery_streaming(engine, question):
+                if event["type"] == "token":
+                    if "ttft_ms" not in trace:  # server-side time to first token, from request start
+                        trace["ttft_ms"] = (time.time() - start) * 1000
+                    yield f"data: {json.dumps(event)}\n\n"
+                else:
+                    result = event
 
         trace = _log_trace({
             **trace, **result.get("timings", {}),
