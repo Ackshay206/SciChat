@@ -1257,6 +1257,12 @@ def collect_all_documents(pdf_path: str) -> List[Document]:
     text_docs = drop_pages_covered_elsewhere(text_docs, structured_docs + ref_docs)
     all_docs.extend(text_docs)
 
+    # The file path ("source") is noise for embeddings and the LLM, and the splitter reserves room for embedded
+    # metadata, so a longer path (uploads arrive under a random temp path) would shift every chunk boundary.
+    for d in all_docs:
+        d.excluded_embed_metadata_keys = sorted(set(d.excluded_embed_metadata_keys) | {"source"})
+        d.excluded_llm_metadata_keys = sorted(set(d.excluded_llm_metadata_keys) | {"source"})
+
     # Summary
     logger.info("\n" + "-" * 40)
     logger.info("📊 DOCUMENT COLLECTION SUMMARY:")
