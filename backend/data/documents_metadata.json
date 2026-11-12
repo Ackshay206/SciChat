@@ -2,8 +2,8 @@
   "7a6bb1fcdcee": {
     "title": "Attention Is All You Need",
     "filename": "attention_is_all_you_need.pdf",
-    "num_nodes": 101,
-    "num_documents": 57,
+    "num_nodes": 74,
+    "num_documents": 48,
     "sections": [
       "Introduction",
       "Background",
@@ -44,14 +44,14 @@
       "Illia Polosukhin"
     ],
     "emails": [
-      "lukaszkaiser@google.com",
-      "llion@google.com",
+      "avaswani@google.com",
       "noam@google.com",
       "nikip@google.com",
+      "usz@google.com",
+      "llion@google.com",
       "aidan@cs.toronto.edu",
-      "illia.polosukhin@gmail.com",
-      "avaswani@google.com",
-      "usz@google.com"
+      "lukaszkaiser@google.com",
+      "illia.polosukhin@gmail.com"
     ],
     "organizations": [
       "Google Brain",
@@ -62,8 +62,8 @@
   "476d76e843fd": {
     "title": "Agentic Memory for LLM Agents",
     "filename": "2502.12110v11.pdf",
-    "num_nodes": 270,
-    "num_documents": 113,
+    "num_nodes": 184,
+    "num_documents": 98,
     "sections": [
       "Introduction",
       "Figure 1: Traditional memory systems require predefined memory access patterns specified in the workflow,",
